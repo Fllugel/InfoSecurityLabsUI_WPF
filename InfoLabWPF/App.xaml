@@ -1,0 +1,32 @@
+﻿<Application x:Class="InfoLabWPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:InfoLabWPF"
+             
+             xmlns:viewModel="clr-namespace:InfoLabWPF.MVVM.ViewModel"
+             xmlns:view="clr-namespace:InfoLabWPF.MVVM.View"
+             
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         <DataTemplate DataType="{x:Type viewModel:Lab1ViewModel}">
+             <view:Lab1></view:Lab1>
+         </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:Lab2ViewModel}">
+            <view:Lab2></view:Lab2>
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:Lab3ViewModel}">
+            <view:Lab3></view:Lab3>
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:Lab4ViewModel}">
+            <view:Lab4></view:Lab4>
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:Lab5ViewModel}">
+            <view:Lab5></view:Lab5>
+        </DataTemplate>
+        
+    </Application.Resources>
+</Application>

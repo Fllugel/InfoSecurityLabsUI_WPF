@@ -1,0 +1,39 @@
+﻿<Window x:Class="InfoLabWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModel="clr-namespace:InfoLabWPF.MVVM.ViewModel"
+        xmlns:local="clr-namespace:InfoLabWPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        MinWidth="400" MinHeight="300">
+    
+    <Window.DataContext>
+        <viewModel:MainViewModel></viewModel:MainViewModel>
+    </Window.DataContext>
+    
+    <Grid>
+        <!-- Define two columns, one for the left menu, one for the right content -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>  
+            <ColumnDefinition Width="2"/>
+            <ColumnDefinition Width="3*"/>  
+        </Grid.ColumnDefinitions>
+
+        <!-- Left panel with buttons to select labs -->
+        <StackPanel Grid.Column="0" Background="LightGray" Margin="0">
+            <TextBlock Text="Select Lab:" FontWeight="Bold" FontSize="16" Margin="10,10,0,10"/>
+            <RadioButton Content="Lab 1" Command="{Binding Lab1ViewCommand}" Margin="5,3" IsChecked="True"/>
+            <RadioButton Content="Lab 2" Command="{Binding Lab2ViewCommand}" Margin="5,3"/>
+            <RadioButton Content="Lab 3" Command="{Binding Lab3ViewCommand}" Margin="5,3"/>
+            <RadioButton Content="Lab 4" Command="{Binding Lab4ViewCommand}" Margin="5,3"/>
+            <RadioButton Content="Lab 5" Command="{Binding Lab5ViewCommand}" Margin="5,3"/>
+        </StackPanel>
+        
+        <Rectangle Grid.Column="1" Fill="Black"></Rectangle>
+
+        <!-- Right panel where the selected lab content will be displayed -->
+        <ContentControl Content="{Binding CurrentView}" Grid.Column="2"/>
+    </Grid>
+</Window>
