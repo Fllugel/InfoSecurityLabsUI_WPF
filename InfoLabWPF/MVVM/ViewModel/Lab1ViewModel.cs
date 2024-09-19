@@ -22,12 +22,14 @@ namespace InfoLabWPF.MVVM.ViewModel
         private int _seed;
         private int _sequenceCount;
         private double _piEstimate;
+        private double _piBuiltInEstimate;
         private int _period;
 
         public Lab1ViewModel()
         {
             GenerateCommand = new RelayCommand(GenerateSequence);
             EstimatePiCommand = new RelayCommand(EstimatePi);
+            EstimatePiBuiltInCommand = new RelayCommand(EstimatePiBuiltIn);
             LoadVariantDataCommand = new RelayCommand(LoadVariantData);
             FindPeriodCommand = new RelayCommand(FindPeriod);
             SaveSequenceCommand = new RelayCommand(SaveSequence);
@@ -35,6 +37,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         public ICommand GenerateCommand { get; }
         public ICommand EstimatePiCommand { get; }
+        public ICommand EstimatePiBuiltInCommand { get; }
         public ICommand LoadVariantDataCommand { get; }
         public ICommand FindPeriodCommand { get; }
         public ICommand SaveSequenceCommand { get; }
@@ -199,7 +202,36 @@ namespace InfoLabWPF.MVVM.ViewModel
                 OnPropertyChanged(nameof(PiDeviation)); 
             }
         }
+        
+        public double PiBuiltInEstimate
+        {
+            get => _piBuiltInEstimate;
+            set
+            {
+                _piBuiltInEstimate = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private void EstimatePiBuiltIn()
+        {
+            var random = new Random();
+            var generatedSequence = new List<int>();
+            
+            for (int i = 0; i < SequenceCount; i++)
+            {
+                generatedSequence.Add(random.Next(0, Modulus));
+            }
+            
+            _gcdTest = new GCDTest(generatedSequence);
+            PiBuiltInEstimate = _gcdTest.EstimatePi();
+    
+            OnPropertyChanged(nameof(PiBuiltInEstimate));
+            OnPropertyChanged(nameof(PiBuiltInDeviation));
+        }
+
         public double PiDeviation => PiEstimate == 0 ? 0 : Math.Abs(Math.PI - PiEstimate);
+        public double PiBuiltInDeviation => PiBuiltInEstimate == 0 ? 0 : Math.Abs(Math.PI - PiBuiltInEstimate);
 
         private void FindPeriod()
         {
