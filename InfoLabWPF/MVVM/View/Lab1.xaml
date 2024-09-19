@@ -9,7 +9,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <StackPanel Margin="10">
-                <TextBlock FontSize="24" FontWeight="Bold" Text="Random Number Generator and GCD Test"/>
+                <TextBlock FontSize="24" FontWeight="Bold" Text="Random Number Generator"/>
                 
                 <StackPanel Orientation="Horizontal" Margin="0,10">
                     <TextBlock Text="Modulus:" VerticalAlignment="Center" Width="100"/>
@@ -38,25 +38,29 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     
                     <Button Grid.Column="0" Command="{Binding GenerateCommand}" Content="Generate Sequence" Margin="0,10"/>
-                    <Button Grid.Column="1" Command="{Binding LoadVariantDataCommand }" Content="Load Data" Margin="0,10"/>
+                    <Button Grid.Column="1" Command="{Binding LoadVariantDataCommand}" Content="Load My Generation Data" Margin="0,10"/>
                 </Grid>
                 
-                <ListBox ItemsSource="{Binding Sequence}" Margin="0,10" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                <ListBox ItemsSource="{Binding Sequence}"  Margin="0,10" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+
                 
-                <TextBlock FontSize="18" FontWeight="Bold" Text="Estimated π:" Margin="0,10"/>
-                <TextBlock Text="{Binding PiEstimate}" FontSize="16"/>
-                
-                <Button Command="{Binding EstimatePiCommand}" Content="Estimate π" Margin="0,10"/>
+                <Button Command="{Binding SaveSequenceCommand}" Content="Save Sequence To File" Margin="0,10"/>
                 
                 <TextBlock FontSize="18" FontWeight="Bold" Text="Period:" Margin="0,10"/>
                 <TextBlock Text="{Binding Period}" FontSize="16"/>
                 
                 <Button Command="{Binding FindPeriodCommand}" Content="Calculate Period" Margin="0,10"/>
+                
+                <TextBlock FontSize="18" FontWeight="Bold" Text="Estimated π:" Margin="0,10"/>
+                <TextBlock FontSize="16" Text="{Binding PiEstimate}" />
+                <TextBlock FontSize="16" Text="{Binding PiDeviation, StringFormat='Deviation: {0:F8}'}" />
+                <Button Command="{Binding EstimatePiCommand}" Content="Estimate π" Margin="0,10"/>
+                
             </StackPanel>
         </Grid>
     </ScrollViewer>

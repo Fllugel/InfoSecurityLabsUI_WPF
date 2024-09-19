@@ -40,15 +40,24 @@ namespace InfoLabWPF.MVVM.Model
         {
             var firstSeed = _initialSeed;
             var currentSeed = firstSeed;
+            HashSet<int> seenSeeds = new HashSet<int>();
             int steps = 0;
-            
+
             do
             {
                 currentSeed = Next();
                 steps++;
-            } while (currentSeed != firstSeed && steps < _modulus);
-            
-            return currentSeed == firstSeed ? steps : -1; 
+
+                if (seenSeeds.Contains(currentSeed))
+                {
+                    return steps - 1; 
+                }
+
+                seenSeeds.Add(currentSeed);
+            } while (steps < _modulus);
+
+            return -1; 
         }
+
     }
 }
