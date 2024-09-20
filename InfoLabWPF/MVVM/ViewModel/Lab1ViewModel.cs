@@ -8,11 +8,11 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using InfoLabWPF.MVVM.Model;
 
-
 namespace InfoLabWPF.MVVM.ViewModel
 {
     public class Lab1ViewModel : INotifyPropertyChanged
     {
+        // Private Fields
         private LinearCongruentialGenerator _lcg;
         private GCDTest _gcdTest;
         private List<int> _sequence;
@@ -25,8 +25,10 @@ namespace InfoLabWPF.MVVM.ViewModel
         private double _piBuiltInEstimate;
         private int _period;
 
+        // Constructor
         public Lab1ViewModel()
         {
+            // Initializing commands
             GenerateCommand = new RelayCommand(GenerateSequence);
             EstimatePiCommand = new RelayCommand(EstimatePi);
             EstimatePiBuiltInCommand = new RelayCommand(EstimatePiBuiltIn);
@@ -35,6 +37,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             SaveSequenceCommand = new RelayCommand(SaveSequence);
         }
 
+        // Commands
         public ICommand GenerateCommand { get; }
         public ICommand EstimatePiCommand { get; }
         public ICommand EstimatePiBuiltInCommand { get; }
@@ -42,6 +45,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand FindPeriodCommand { get; }
         public ICommand SaveSequenceCommand { get; }
 
+        // Properties
         public int Modulus
         {
             get => _modulus;
@@ -127,60 +131,6 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        public int Period
-        {
-            get => _period;
-            set
-            {
-                _period = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private void GenerateSequence()
-        {
-            if (Modulus <= 0 || Multiplier <= 0 || SequenceCount <= 0)
-            {
-                MessageBox.Show("Please ensure that Modulus, Multiplier, and Sequence Count are all positive values.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (Multiplier >= Modulus || Increment >= Modulus || Seed >= Modulus)
-            {
-                MessageBox.Show("Multiplier, Increment, and Seed must be less than Modulus.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            
-            if (Modulus >= int.MaxValue || Multiplier >= int.MaxValue || SequenceCount>= int.MaxValue)
-            {
-                MessageBox.Show($"Multiplier, Increment, and Seed must be less than {int.MaxValue}", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-                
-            _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
-            Sequence = new List<int>(_lcg.GenerateSequence(_sequenceCount));
-            _gcdTest = new GCDTest(Sequence);
-            OnPropertyChanged(nameof(Sequence));
-        }
-
-        private void EstimatePi()
-        {
-            if (_gcdTest != null)
-            {
-                PiEstimate = _gcdTest.EstimatePi();
-                OnPropertyChanged(nameof(PiEstimate));
-                OnPropertyChanged(nameof(PiDeviation)); 
-            }
-        }
-        
-        private void SaveSequence()
-        {
-            if (_lcg != null)
-            {
-                _lcg.SaveSequence(_sequence);
-            }
-        }
-        
         public double PiBuiltInEstimate
         {
             get => _piBuiltInEstimate;
@@ -191,35 +141,76 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private void EstimatePiBuiltIn()
+        public int Period
         {
-            var random = new Random();
-            var generatedSequence = new List<int>();
-            
-            for (int i = 0; i < SequenceCount; i++)
+            get => _period;
+            set
             {
-                generatedSequence.Add(random.Next(0, Modulus));
+                _period = value;
+                OnPropertyChanged();
             }
-            
-            _gcdTest = new GCDTest(generatedSequence);
-            PiBuiltInEstimate = _gcdTest.EstimatePi();
-    
-            OnPropertyChanged(nameof(PiBuiltInEstimate));
-            OnPropertyChanged(nameof(PiBuiltInDeviation));
         }
 
         public double PiDeviation => PiEstimate == 0 ? 0 : Math.Abs(Math.PI - PiEstimate);
         public double PiBuiltInDeviation => PiBuiltInEstimate == 0 ? 0 : Math.Abs(Math.PI - PiBuiltInEstimate);
+
+        // Methods
+        private void GenerateSequence()
+        {
+            if (!IsValidGenerationInput())
+            {
+                MessageBox.Show("Please ensure all inputs are valid and non-negative.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
+            Sequence = new List<int>(_lcg.GenerateSequence(_sequenceCount));
+            _gcdTest = new GCDTest(Sequence);
+        }
+
+        private bool IsValidGenerationInput()
+        {
+            return Modulus > 0 && Multiplier > 0 && SequenceCount > 0
+                   && Multiplier < Modulus && Increment < Modulus && Seed < Modulus;
+        }
+
+        private void EstimatePi()
+        {
+            if (_gcdTest != null)
+            {
+                PiEstimate = _gcdTest.EstimatePi();
+                OnPropertyChanged(nameof(PiDeviation));
+            }
+        }
+
+        private void EstimatePiBuiltIn()
+        {
+            var random = new Random();
+            var generatedSequence = new List<int>();
+
+            for (int i = 0; i < SequenceCount; i++)
+            {
+                generatedSequence.Add(random.Next(0, Modulus));
+            }
+
+            _gcdTest = new GCDTest(generatedSequence);
+            PiBuiltInEstimate = _gcdTest.EstimatePi();
+            OnPropertyChanged(nameof(PiBuiltInDeviation));
+        }
 
         private void FindPeriod()
         {
             if (_lcg != null)
             {
                 Period = _lcg.FindPeriod();
-                OnPropertyChanged(nameof(Period));
             }
         }
-        
+
+        private void SaveSequence()
+        {
+            _lcg?.SaveSequence(_sequence);
+        }
+
         private void LoadVariantData()
         {
             Modulus = (1 << 19) - 1;
@@ -229,8 +220,8 @@ namespace InfoLabWPF.MVVM.ViewModel
             SequenceCount = 1000;
         }
 
+        // INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
