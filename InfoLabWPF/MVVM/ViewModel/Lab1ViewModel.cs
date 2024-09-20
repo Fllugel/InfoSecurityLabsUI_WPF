@@ -150,7 +150,13 @@ namespace InfoLabWPF.MVVM.ViewModel
                 MessageBox.Show("Multiplier, Increment, and Seed must be less than Modulus.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
+            
+            if (Modulus >= int.MaxValue || Multiplier >= int.MaxValue || SequenceCount>= int.MaxValue)
+            {
+                MessageBox.Show($"Multiplier, Increment, and Seed must be less than {int.MaxValue}", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+                
             _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
             Sequence = new List<int>(_lcg.GenerateSequence(_sequenceCount));
             _gcdTest = new GCDTest(Sequence);
