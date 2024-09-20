@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Windows;
+using Microsoft.Win32;
 
 namespace InfoLabWPF.MVVM.Model
 {
@@ -59,5 +62,38 @@ namespace InfoLabWPF.MVVM.Model
             return -1; 
         }
 
+        public void SaveSequence(IEnumerable<int> sequence)
+        {
+            if (sequence == null)
+            {
+                return;
+            }
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
+                Title = "Save Sequence"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        foreach (var number in sequence)
+                        {
+                            writer.WriteLine(number);
+                        }
+                    }
+
+                    MessageBox.Show("Sequence saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using InfoLabWPF.MVVM.Model;
-using Microsoft.Win32;
+
 
 namespace InfoLabWPF.MVVM.ViewModel
 {
@@ -163,42 +163,6 @@ namespace InfoLabWPF.MVVM.ViewModel
             OnPropertyChanged(nameof(Sequence));
         }
 
-
-
-        private void SaveSequence()
-        {
-            if (Sequence == null || Sequence.Count == 0)
-            {
-                return;
-            }
-
-            var saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
-                Title = "Save Sequence"
-            };
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                try
-                {
-                    using (var writer = new StreamWriter(saveFileDialog.FileName))
-                    {
-                        foreach (var number in Sequence)
-                        {
-                            writer.WriteLine(number);
-                        }
-                    }
-
-                    MessageBox.Show("Sequence saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
         private void EstimatePi()
         {
             if (_gcdTest != null)
@@ -206,6 +170,14 @@ namespace InfoLabWPF.MVVM.ViewModel
                 PiEstimate = _gcdTest.EstimatePi();
                 OnPropertyChanged(nameof(PiEstimate));
                 OnPropertyChanged(nameof(PiDeviation)); 
+            }
+        }
+        
+        private void SaveSequence()
+        {
+            if (_lcg != null)
+            {
+                _lcg.SaveSequence(_sequence);
             }
         }
         
