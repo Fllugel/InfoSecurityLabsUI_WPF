@@ -213,13 +213,15 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadVariantData()
         {
-            Modulus = (1 << 19) - 1;
-            Multiplier = 6 * 6 * 6;
-            Increment = 55;
-            Seed = 1024;
-            SequenceCount = 1000;
-        }
+            ConfigLoader configLoader = new ConfigLoader();
 
+            Modulus = configLoader.Modulus;
+            Multiplier = configLoader.Multiplier;
+            Increment = configLoader.Increment;
+            Seed = configLoader.Seed;
+            SequenceCount = configLoader.SequenceCount;
+        }
+        
         // INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
