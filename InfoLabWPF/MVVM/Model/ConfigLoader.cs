@@ -1,4 +1,7 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 
 public class ConfigLoader
 {
@@ -20,5 +23,27 @@ public class ConfigLoader
         Lab1Increment = uint.Parse(ConfigurationManager.AppSettings["Lab1.Increment"]);
         Lab1Seed = uint.Parse(ConfigurationManager.AppSettings["Lab1.Seed"]);
         Lab1SequenceCount = uint.Parse(ConfigurationManager.AppSettings["Lab1.SequenceCount"]);
+    }
+
+    public List<(string Input, string Expected)> LoadConfigLab2()
+    {
+        var testValues = new List<(string Input, string Expected)>();
+        int index = 0;
+
+        while (true)
+        {
+            string inputKey = $"Lab2.TestInput.{index}";
+            string expectedKey = $"Lab2.ExpectedHash.{index}";
+
+            string inputValue = ConfigurationManager.AppSettings[inputKey];
+            string expectedValue = ConfigurationManager.AppSettings[expectedKey];
+
+            if (inputValue == null || expectedValue == null) break;
+
+            testValues.Add((inputValue, expectedValue));
+            index++;
+        }
+
+        return testValues;
     }
 }

@@ -3,10 +3,44 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:InfoLabWPF.MVVM.View"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="600">
-    <Grid>
-        <TextBlock FontSize="50">Lab2 Under Development</TextBlock>
-    </Grid>
+             d:DesignHeight="900" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <StackPanel Margin="10">
+                <TextBlock FontSize="24" FontWeight="Bold" Text="MD5 Hash Function" />
+
+                <!-- Enter Message Section -->
+                <TextBlock Text="Enter Message:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" MinHeight="50" MaxHeight="150"
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="0,5" />
+
+                <!-- Encrypted Message Section -->
+                <TextBlock Text="Encrypted Message:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding EncryptedMessage}" MinHeight="50" MaxHeight="150" IsReadOnly="True"
+                         TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="0,5" />
+
+                <!-- Buttons Section -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Encrypt" Command="{Binding EncryptCommand}" Margin="0,10" />
+                    <Button Grid.Column="1" Content="Load Message From File"
+                            Command="{Binding LoadMessageFromFileCommand}" Margin="0,10" />
+                </Grid>
+
+                <Button Content="Save Encrypted Message To File" Command="{Binding SaveEncryptedMessageToFileCommand}" />
+
+                <!-- Test Hashes Section -->
+                <TextBlock Text="Test Values:" FontWeight="Bold" Margin="0,5" />
+                <Button Content="Test Hash Values" Command="{Binding TestHashValuesCommand}"/>
+
+                <TextBlock Text="Test Results:" FontWeight="Bold" />
+                <TextBlock Text="{Binding TestResults}" TextWrapping="Wrap" Margin="0,5" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
