@@ -230,11 +230,11 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             ConfigLoader configLoader = new ConfigLoader();
 
-            Modulus = configLoader.Modulus.ToString();
-            Multiplier = configLoader.Multiplier.ToString();
-            Increment = configLoader.Increment.ToString();
-            Seed = configLoader.Seed.ToString();
-            SequenceCount = configLoader.SequenceCount.ToString();
+            Modulus = configLoader.Lab1Modulus.ToString(); 
+            Multiplier = configLoader.Lab1Multiplier.ToString();  
+            Increment = configLoader.Lab1Increment.ToString();  
+            Seed = configLoader.Lab1Seed.ToString(); 
+            SequenceCount = configLoader.Lab1SequenceCount.ToString(); 
         }
 
         private void ShowError(string message)

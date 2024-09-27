@@ -2,23 +2,23 @@
 
 public class ConfigLoader
 {
-    public int Modulus { get; private set; }
-    public int Multiplier { get; private set; }
-    public int Increment { get; private set; }
-    public int Seed { get; private set; }
-    public int SequenceCount { get; private set; }
+    public uint Lab1Modulus { get; private set; }
+    public uint Lab1Multiplier { get; private set; }
+    public uint Lab1Increment { get; private set; }
+    public uint Lab1Seed { get; private set; }
+    public uint Lab1SequenceCount { get; private set; }
 
     public ConfigLoader()
     {
-        LoadConfig();
+        LoadConfigLab1();
     }
 
-    private void LoadConfig()
+    private void LoadConfigLab1()
     {
-        Modulus = int.Parse(ConfigurationManager.AppSettings["Modulus"]);
-        Multiplier = int.Parse(ConfigurationManager.AppSettings["Multiplier"]);
-        Increment = int.Parse(ConfigurationManager.AppSettings["Increment"]);
-        Seed = int.Parse(ConfigurationManager.AppSettings["Seed"]);
-        SequenceCount = int.Parse(ConfigurationManager.AppSettings["SequenceCount"]);
+        Lab1Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab1.Modulus"]);
+        Lab1Multiplier = uint.Parse(ConfigurationManager.AppSettings["Lab1.Multiplier"]);
+        Lab1Increment = uint.Parse(ConfigurationManager.AppSettings["Lab1.Increment"]);
+        Lab1Seed = uint.Parse(ConfigurationManager.AppSettings["Lab1.Seed"]);
+        Lab1SequenceCount = uint.Parse(ConfigurationManager.AppSettings["Lab1.SequenceCount"]);
     }
 }
