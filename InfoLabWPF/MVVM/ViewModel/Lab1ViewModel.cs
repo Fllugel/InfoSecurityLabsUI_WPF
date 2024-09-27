@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -15,15 +14,15 @@ namespace InfoLabWPF.MVVM.ViewModel
         // Private Fields
         private LinearCongruentialGenerator _lcg;
         private GCDTest _gcdTest;
-        private List<int> _sequence;
-        private int _modulus;
-        private int _multiplier;
-        private int _increment;
-        private int _seed;
-        private int _sequenceCount;
+        private List<uint> _sequence;
+        private uint _modulus;
+        private uint _multiplier;
+        private uint _increment;
+        private uint _seed;
+        private uint _sequenceCount;
         private double _piEstimate;
         private double _piBuiltInEstimate;
-        private int _period;
+        private uint _period;
 
         // Constructor
         public Lab1ViewModel()
@@ -35,6 +34,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             LoadVariantDataCommand = new RelayCommand(LoadVariantData);
             FindPeriodCommand = new RelayCommand(FindPeriod);
             SaveSequenceCommand = new RelayCommand(SaveSequence);
+            _gcdTest = new GCDTest();
         }
 
         // Commands
@@ -45,73 +45,93 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand FindPeriodCommand { get; }
         public ICommand SaveSequenceCommand { get; }
 
-        // Properties
-        public int Modulus
+        // Properties with string input and validation
+        public string Modulus
         {
-            get => _modulus;
+            get => _modulus.ToString();
             set
             {
-                if (value >= 0)
+                if (uint.TryParse(value, out uint result))
                 {
-                    _modulus = value;
+                    _modulus = result;
                     OnPropertyChanged();
+                }
+                else
+                {
+                    ShowError("Modulus must be a positive integer and less than the maximum value of uint.");
                 }
             }
         }
 
-        public int Multiplier
+        public string Multiplier
         {
-            get => _multiplier;
+            get => _multiplier.ToString();
             set
             {
-                if (value >= 0)
+                if (uint.TryParse(value, out uint result))
                 {
-                    _multiplier = value;
+                    _multiplier = result;
                     OnPropertyChanged();
+                }
+                else
+                {
+                    ShowError("Multiplier must be a positive integer and less than the maximum value of uint.");
                 }
             }
         }
 
-        public int Increment
+        public string Increment
         {
-            get => _increment;
+            get => _increment.ToString();
             set
             {
-                if (value >= 0)
+                if (uint.TryParse(value, out uint result))
                 {
-                    _increment = value;
+                    _increment = result;
                     OnPropertyChanged();
+                }
+                else
+                {
+                    ShowError("Increment must be a positive integer and less than the maximum value of uint.");
                 }
             }
         }
 
-        public int Seed
+        public string Seed
         {
-            get => _seed;
+            get => _seed.ToString();
             set
             {
-                if (value >= 0)
+                if (uint.TryParse(value, out uint result))
                 {
-                    _seed = value;
+                    _seed = result;
                     OnPropertyChanged();
+                }
+                else
+                {
+                    ShowError("Seed must be a positive integer and less than the maximum value of uint.");
                 }
             }
         }
 
-        public int SequenceCount
+        public string SequenceCount
         {
-            get => _sequenceCount;
+            get => _sequenceCount.ToString();
             set
             {
-                if (value >= 0)
+                if (uint.TryParse(value, out uint result))
                 {
-                    _sequenceCount = value;
+                    _sequenceCount = result;
                     OnPropertyChanged();
+                }
+                else
+                {
+                    ShowError("Sequence count must be a positive integer and less than the maximum value of uint.");
                 }
             }
         }
 
-        public List<int> Sequence
+        public List<uint> Sequence
         {
             get => _sequence;
             set
@@ -141,13 +161,20 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        public int Period
+        public string Period
         {
-            get => _period;
+            get => _period.ToString();
             set
             {
-                _period = value;
-                OnPropertyChanged();
+                if (uint.TryParse(value, out uint result))
+                {
+                    _period = result;
+                    OnPropertyChanged();
+                }
+                else
+                {
+                    ShowError("Period must be a positive integer and less than the maximum value of uint.");
+                }
             }
         }
 
@@ -157,28 +184,18 @@ namespace InfoLabWPF.MVVM.ViewModel
         // Methods
         private void GenerateSequence()
         {
-            if (!IsValidGenerationInput())
-            {
-                MessageBox.Show("Please ensure all inputs are valid and non-negative.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
-            Sequence = new List<int>(_lcg.GenerateSequence(_sequenceCount));
-            _gcdTest = new GCDTest(Sequence);
-        }
+            Sequence = new List<uint>(_lcg.GenerateSequence(_sequenceCount));
 
-        private bool IsValidGenerationInput()
-        {
-            return Modulus > 0 && Multiplier > 0 && SequenceCount > 0
-                   && Multiplier < Modulus && Increment < Modulus && Seed < Modulus;
+            MessageBox.Show("Sequence generation was successful.", "Success", MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         private void EstimatePi()
         {
             if (_gcdTest != null)
             {
-                PiEstimate = _gcdTest.EstimatePi();
+                PiEstimate = _gcdTest.EstimatePi(_sequence);
                 OnPropertyChanged(nameof(PiDeviation));
             }
         }
@@ -186,15 +203,13 @@ namespace InfoLabWPF.MVVM.ViewModel
         private void EstimatePiBuiltIn()
         {
             var random = new Random();
-            var generatedSequence = new List<int>();
+            var generatedSequence = new List<uint>();
 
-            for (int i = 0; i < SequenceCount; i++)
+            for (int i = 0; i < _sequenceCount; i++)
             {
-                generatedSequence.Add(random.Next(0, Modulus));
+                generatedSequence.Add((uint)random.Next(0, (int)_modulus));
             }
-
-            _gcdTest = new GCDTest(generatedSequence);
-            PiBuiltInEstimate = _gcdTest.EstimatePi();
+            PiBuiltInEstimate = _gcdTest.EstimatePi(generatedSequence);
             OnPropertyChanged(nameof(PiBuiltInDeviation));
         }
 
@@ -202,7 +217,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             if (_lcg != null)
             {
-                Period = _lcg.FindPeriod();
+                Period = _lcg.FindPeriod().ToString();
             }
         }
 
@@ -215,15 +230,21 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             ConfigLoader configLoader = new ConfigLoader();
 
-            Modulus = configLoader.Modulus;
-            Multiplier = configLoader.Multiplier;
-            Increment = configLoader.Increment;
-            Seed = configLoader.Seed;
-            SequenceCount = configLoader.SequenceCount;
+            Modulus = configLoader.Modulus.ToString();
+            Multiplier = configLoader.Multiplier.ToString();
+            Increment = configLoader.Increment.ToString();
+            Seed = configLoader.Seed.ToString();
+            SequenceCount = configLoader.SequenceCount.ToString();
         }
-        
+
+        private void ShowError(string message)
+        {
+            MessageBox.Show(message, "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
         // INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

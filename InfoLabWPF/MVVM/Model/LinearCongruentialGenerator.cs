@@ -8,13 +8,13 @@ namespace InfoLabWPF.MVVM.Model
 {
     public class LinearCongruentialGenerator
     {
-        private readonly int _modulus;
-        private readonly int _multiplier;
-        private readonly int _increment;
-        private int _currentSeed;
-        private readonly int _initialSeed;
-        
-        public LinearCongruentialGenerator(int modulus, int multiplier, int increment, int seed)
+        private readonly uint _modulus;
+        private readonly uint _multiplier;
+        private readonly uint _increment;
+        private uint _currentSeed;
+        private readonly uint _initialSeed;
+
+        public LinearCongruentialGenerator(uint modulus, uint multiplier, uint increment, uint seed)
         {
             _modulus = modulus;
             _multiplier = multiplier;
@@ -22,28 +22,28 @@ namespace InfoLabWPF.MVVM.Model
             _currentSeed = seed;
             _initialSeed = seed;
         }
-        
-        public int Next()
+
+        public uint Next()
         {
             _currentSeed = (_multiplier * _currentSeed + _increment) % _modulus;
             return _currentSeed;
         }
-        
-        public IEnumerable<int> GenerateSequence(int count)
+
+        public IEnumerable<uint> GenerateSequence(uint count)
         {
-            var sequence = new List<int>();
-            for (int i = 0; i < count; i++)
+            var sequence = new List<uint>();
+            for (uint i = 0; i < count; i++)
             {
                 sequence.Add(Next());
             }
             return sequence;
         }
-        
+
         public int FindPeriod()
         {
             var firstSeed = _initialSeed;
             var currentSeed = firstSeed;
-            HashSet<int> seenSeeds = new HashSet<int>();
+            HashSet<uint> seenSeeds = new HashSet<uint>();
             int steps = 0;
 
             do
@@ -59,10 +59,10 @@ namespace InfoLabWPF.MVVM.Model
                 seenSeeds.Add(currentSeed);
             } while (steps < _modulus);
 
-            return -1; 
+            return -1;
         }
 
-        public void SaveSequence(IEnumerable<int> sequence)
+        public void SaveSequence(IEnumerable<uint> sequence)
         {
             if (sequence == null)
             {
