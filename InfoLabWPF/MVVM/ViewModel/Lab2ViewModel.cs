@@ -12,9 +12,10 @@ namespace InfoLabWPF.MVVM.ViewModel
 {
     public class Lab2ViewModel : INotifyPropertyChanged
     {
-        private string _message;
+        private string _message = "";
         private string _encryptedMessage;
         private string _testResults;
+        private string _userNotification;
 
         private readonly MD5 _md5;
 
@@ -38,7 +39,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             set
             {
                 _message = value;
-                OnPropertyChanged();
+                UserNotification = "";  
             }
         }
 
@@ -62,21 +63,24 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
+        public string UserNotification
+        {
+            get => _userNotification;
+            set
+            {
+                _userNotification = value;
+                OnPropertyChanged();
+            }
+        }
+
         private void EncryptMessage()
         {
-            if (!string.IsNullOrEmpty(Message))
-            {
-                byte[] messageBytes = Encoding.UTF8.GetBytes(Message);
-                byte[] hashBytes = _md5.ComputeHash(messageBytes);
-                EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
+            byte[] messageBytes = Encoding.UTF8.GetBytes(Message);
+            byte[] hashBytes = _md5.ComputeHash(messageBytes);
+            EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
 
-                MessageBox.Show("Message encryption was successful.", "Success", MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            }
-            else
-            {
-                ShowError("Please enter a message to encrypt.");
-            }
+            MessageBox.Show("Message encryption was successful.", "Success", MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         private void TestHashValues()
@@ -88,7 +92,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             foreach (var (input, expected) in expectedValues)
             {
                 byte[] hashBytes = _md5.ComputeHash(Encoding.UTF8.GetBytes(input));
-                string hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
+                string hashString = BitConverter.ToString(hashBytes).Replace("-", "");
 
                 results.AppendLine($"Input: {input}");
                 results.AppendLine($"Expected: {expected}");
@@ -103,7 +107,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
+                Filter = "Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
                 Title = "Load Input File"
             };
 
@@ -111,11 +115,10 @@ namespace InfoLabWPF.MVVM.ViewModel
             {
                 try
                 {
-                    Message = File.ReadAllText(openFileDialog.FileName);
-                    EncryptMessage(); // Use the EncryptMessage method after loading the input
-
-                    MessageBox.Show("Input loaded successfully.", "Success", MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
+                    Message = inputText;  
+                    UserNotification = "Loaded message from file. Type your own message to override."; 
+                    Console.WriteLine("Input file loaded successfully.");
                 }
                 catch (Exception ex)
                 {
@@ -124,13 +127,15 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
+
         private void SaveHashToFile()
         {
             if (!string.IsNullOrEmpty(EncryptedMessage))
             {
                 var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
+                    Filter =
+                        "Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
                     Title = "Save Hash"
                 };
 
@@ -138,8 +143,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 {
                     try
                     {
-                        byte[] hashBytes = _md5.ComputeHash(Encoding.UTF8.GetBytes(EncryptedMessage));
-                        _md5.SaveHashToFile(saveFileDialog.FileName, hashBytes);
+                        _md5.SaveHashToFile(saveFileDialog.FileName, EncryptedMessage);
                     }
                     catch (Exception ex)
                     {

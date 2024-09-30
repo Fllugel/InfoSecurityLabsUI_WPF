@@ -3,17 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:view="clr-namespace:InfoLabWPF.MVVM.View"
              mc:Ignorable="d"
              d:DesignHeight="900" d:DesignWidth="600">
+    <UserControl.Resources>
+        <view:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+    </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <StackPanel Margin="10">
                 <TextBlock FontSize="24" FontWeight="Bold" Text="MD5 Hash Function" />
 
                 <!-- Enter Message Section -->
-                <TextBlock Text="Enter Message:" VerticalAlignment="Center" Margin="0,5" />
-                <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" MinHeight="50" MaxHeight="150"
-                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="0,5" />
+                <StackPanel Margin="0,5">
+                    <TextBlock Text="Enter Message:" VerticalAlignment="Center" />
+                    <Grid>
+                        <TextBox Name="MessageTextBox" Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
+                                 MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap" 
+                                 VerticalScrollBarVisibility="Auto" />
+                        <TextBlock Text="{Binding UserNotification}" Foreground="Orange" 
+                                   VerticalAlignment="Top" Margin="5,3" 
+                                   IsHitTestVisible="False" 
+                                   Visibility="{Binding Message, Converter={StaticResource StringToVisibilityConverter}}" />
+                    </Grid>
+                </StackPanel>
 
                 <!-- Encrypted Message Section -->
                 <TextBlock Text="Encrypted Message:" VerticalAlignment="Center" Margin="0,5" />
@@ -29,17 +42,17 @@
 
                     <Button Grid.Column="0" Content="Encrypt" Command="{Binding EncryptCommand}" Margin="0,10" />
                     <Button Grid.Column="1" Content="Load Message From File"
-                            Command="{Binding LoadMessageFromFileCommand}" Margin="0,10" />
+                            Command="{Binding LoadInputFromFileCommand}" Margin="0,10" />
                 </Grid>
 
-                <Button Content="Save Encrypted Message To File" Command="{Binding SaveEncryptedMessageToFileCommand}" />
+                <Button Content="Save Encrypted Message To File" Command="{Binding SaveHashToFileCommand}" />
 
                 <!-- Test Hashes Section -->
-                <TextBlock Text="Test Values:" FontWeight="Bold" Margin="0,5" />
-                <Button Content="Test Hash Values" Command="{Binding TestHashValuesCommand}"/>
-
-                <TextBlock Text="Test Results:" FontWeight="Bold" />
-                <TextBlock Text="{Binding TestResults}" TextWrapping="Wrap" Margin="0,5" />
+                <TextBlock Text="Test Basic Values:" FontWeight="Bold" Margin="0,5" />
+                <TextBox Text="{Binding TestResults}" TextWrapping="Wrap" 
+                         MinHeight="100" MaxHeight="200" IsReadOnly="True" 
+                         VerticalScrollBarVisibility="Auto" Margin="0,5" />
+                <Button Content="Test Hash Values" Command="{Binding TestHashValuesCommand}" Margin="0,5" />
             </StackPanel>
         </Grid>
     </ScrollViewer>
