@@ -18,7 +18,6 @@ namespace InfoLabWPF.MVVM.View
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Convert the string value to Visibility
             return string.IsNullOrWhiteSpace(value as string) ? Visibility.Visible : Visibility.Collapsed;
         }
 
