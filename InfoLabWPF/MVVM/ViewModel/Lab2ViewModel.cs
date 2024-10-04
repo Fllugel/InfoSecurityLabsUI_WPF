@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -26,12 +25,14 @@ namespace InfoLabWPF.MVVM.ViewModel
             TestHashValuesCommand = new RelayCommand(TestHashValues);
             LoadInputFromFileCommand = new RelayCommand(LoadInputFromFile);
             SaveHashToFileCommand = new RelayCommand(SaveHashToFile);
+            VerifyHashCommand = new RelayCommand(VerifyHash);
         }
 
         public ICommand EncryptCommand { get; }
         public ICommand TestHashValuesCommand { get; }
         public ICommand LoadInputFromFileCommand { get; }
         public ICommand SaveHashToFileCommand { get; }
+        public ICommand VerifyHashCommand { get; }
 
         public string Message
         {
@@ -78,7 +79,6 @@ namespace InfoLabWPF.MVVM.ViewModel
             byte[] messageBytes = Encoding.UTF8.GetBytes(Message);
             byte[] hashBytes = _md5.ComputeHash(messageBytes);
             EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
-
             MessageBox.Show("Message encryption was successful.", "Success", MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
@@ -87,19 +87,16 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             ConfigLoader configLoader = new ConfigLoader();
             var expectedValues = configLoader.LoadConfigLab2();
-
             var results = new StringBuilder();
             foreach (var (input, expected) in expectedValues)
             {
                 byte[] hashBytes = _md5.ComputeHash(Encoding.UTF8.GetBytes(input));
                 string hashString = BitConverter.ToString(hashBytes).Replace("-", "");
-
                 results.AppendLine($"Input: {input}");
                 results.AppendLine($"Expected: {expected}");
                 results.AppendLine($"Computed: {hashString}");
                 results.AppendLine();
             }
-
             TestResults = results.ToString();
         }
 
@@ -107,7 +104,6 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
                 Title = "Load Input File"
             };
 
@@ -118,7 +114,6 @@ namespace InfoLabWPF.MVVM.ViewModel
                     _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
                     Message = inputText;  
                     UserNotification = "Loaded message from file. Type your own message to override."; 
-                    Console.WriteLine("Input file loaded successfully.");
                 }
                 catch (Exception ex)
                 {
@@ -127,15 +122,12 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-
         private void SaveHashToFile()
         {
             if (!string.IsNullOrEmpty(EncryptedMessage))
             {
                 var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter =
-                        "Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
                     Title = "Save Hash"
                 };
 
@@ -156,6 +148,43 @@ namespace InfoLabWPF.MVVM.ViewModel
                 ShowError("There is no hash to save.");
             }
         }
+
+        private void VerifyHash()
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Verify Input File"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
+                    byte[] computedHash = _md5.ComputeHash(Encoding.UTF8.GetBytes(inputText));
+                    string expectedHash = EncryptedMessage; 
+                    string computedHashString = BitConverter.ToString(computedHash).Replace("-", "").ToUpper();
+                    
+                    MessageBox.Show($"Computed Hash: {computedHashString}\nExpected Hash: {expectedHash}", 
+                        "Debug Information", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    if (computedHashString == expectedHash)
+                    {
+                        MessageBox.Show("Hash verification successful. The file hash matches the expected hash.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hash verification failed. The file hash does not match the expected hash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowError($"Error verifying hash: {ex.Message}");
+                }
+            }
+        }
+
+
 
         private void ShowError(string message)
         {

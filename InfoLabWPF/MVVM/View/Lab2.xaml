@@ -14,7 +14,6 @@
             <StackPanel Margin="10">
                 <TextBlock FontSize="24" FontWeight="Bold" Text="MD5 Hash Function" />
 
-                <!-- Enter Message Section -->
                 <StackPanel Margin="0,5">
                     <TextBlock Text="Enter Message:" VerticalAlignment="Center" />
                     <Grid>
@@ -28,12 +27,10 @@
                     </Grid>
                 </StackPanel>
 
-                <!-- Encrypted Message Section -->
                 <TextBlock Text="Encrypted Message:" VerticalAlignment="Center" Margin="0,5" />
                 <TextBox Text="{Binding EncryptedMessage}" MinHeight="50" MaxHeight="150" IsReadOnly="True"
                          TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="0,5" />
 
-                <!-- Buttons Section -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
@@ -47,7 +44,14 @@
 
                 <Button Content="Save Encrypted Message To File" Command="{Binding SaveHashToFileCommand}" />
 
-                <!-- Test Hashes Section -->
+                <StackPanel Margin="0,5">
+                    <TextBlock Text="Enter Expected Hash:" VerticalAlignment="Center" />
+                    <TextBox Name="ExpectedHashTextBox" Text="{Binding ExpectedHash, UpdateSourceTrigger=PropertyChanged}" 
+                             MinHeight="30" MaxHeight="50" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+
+                <Button Content="Verify File Integrity" Command="{Binding VerifyHashCommand}" Margin="0,5" />
+
                 <TextBlock Text="Test Basic Values:" FontWeight="Bold" Margin="0,5" />
                 <TextBox Text="{Binding TestResults}" TextWrapping="Wrap" 
                          MinHeight="100" MaxHeight="200" IsReadOnly="True" 
