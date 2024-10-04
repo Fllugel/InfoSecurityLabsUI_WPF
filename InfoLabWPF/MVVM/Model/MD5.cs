@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 public class MD5
 {
@@ -16,32 +17,39 @@ public class MD5
 
     public byte[] ComputeHash(byte[] input)
     {
-        // Reinitialize the state before each computation
-        Initialize();
-
-        // Step 1: Padding the input
-        byte[] paddedInput = PadInput(input);
-    
-        // Step 2: Initialize MD5 buffer
-        uint[] M = new uint[16];
-    
-        // Step 3: Process each 512-bit chunk
-        for (int i = 0; i < paddedInput.Length; i += 64)
-        {
-            Buffer.BlockCopy(paddedInput, i, M, 0, 64);
-
-            // Convert little-endian byte order to uint32 values
-            for (int j = 0; j < 16; j++)
-            {
-                M[j] = BitConverter.ToUInt32(paddedInput, i + j * 4);
-            }
-
-            ProcessChunk(M);
-        }
-    
-        // Step 4: Output hash
-        return GetResult();
+        return Task.Run(() => ComputeHashAsync(input)).GetAwaiter().GetResult();
     }
+    
+    private async Task<byte[]> ComputeHashAsync(byte[] input)
+    {
+        return await Task.Run(() =>
+        {
+            Initialize();
+
+            // Step 1: Padding the input
+            byte[] paddedInput = PadInput(input);
+    
+            // Step 2: Initialize MD5 buffer
+            uint[] M = new uint[16];
+    
+            // Step 3: Process each 512-bit chunk
+            for (int i = 0; i < paddedInput.Length; i += 64)
+            {
+                Buffer.BlockCopy(paddedInput, i, M, 0, 64);
+                
+                for (int j = 0; j < 16; j++)
+                {
+                    M[j] = BitConverter.ToUInt32(paddedInput, i + j * 4);
+                }
+
+                ProcessChunk(M);
+            }
+    
+            // Step 4: Output hash
+            return GetResult();
+        });
+    }
+
 
     private void Initialize()
     {
@@ -143,8 +151,7 @@ public class MD5
     {
         return (x << n) | (x >> (32 - n));
     }
-
-    public void LoadInputFromFile(string filePath, out string inputText)
+    public async Task<string> LoadInputFromFileAsync(string filePath)
     {
         if (!File.Exists(filePath))
         {
@@ -161,19 +168,25 @@ public class MD5
                 char[] buffer = new char[4096];
                 int bytesRead;
 
-                while ((bytesRead = reader.Read(buffer, 0, buffer.Length)) > 0)
+                while ((bytesRead = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
                     contentBuilder.Append(buffer, 0, bytesRead);
                 }
             }
-
-            inputText = contentBuilder.ToString();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            inputText = string.Empty;
+            return string.Empty;
         }
+
+        return contentBuilder.ToString();
     }
+    
+    public void LoadInputFromFile(string filePath, out string inputText)
+    {
+        inputText = Task.Run(() => LoadInputFromFileAsync(filePath)).GetAwaiter().GetResult();
+    }
+
 
     public void SaveHashToFile(string filePath, string content)
     {

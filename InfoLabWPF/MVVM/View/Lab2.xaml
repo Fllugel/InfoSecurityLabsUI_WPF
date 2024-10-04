@@ -15,7 +15,7 @@
                 <TextBlock FontSize="24" FontWeight="Bold" Text="MD5 Hash Function" />
 
                 <StackPanel Margin="0,5">
-                    <TextBlock Text="Enter Message:" VerticalAlignment="Center" />
+                    <TextBlock Text="Enter Message:" VerticalAlignment="Center" Margin="0,5" />
                     <Grid>
                         <TextBox Name="MessageTextBox" Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" 
                                  MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap" 
@@ -45,17 +45,17 @@
                 <Button Content="Save Encrypted Message To File" Command="{Binding SaveHashToFileCommand}" />
 
                 <StackPanel Margin="0,5">
-                    <TextBlock Text="Enter Expected Hash:" VerticalAlignment="Center" />
-                    <TextBox Name="ExpectedHashTextBox" Text="{Binding ExpectedHash, UpdateSourceTrigger=PropertyChanged}" 
-                             MinHeight="30" MaxHeight="50" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
+                    <TextBlock Text="File Integrity Test:" FontWeight="Bold" Margin="0,5" />
+                    <TextBlock Text="Enter expected hash below:" />
+                    <TextBox Text="{Binding TestHash, UpdateSourceTrigger=PropertyChanged}" 
+                             MinHeight="20"  TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
                 </StackPanel>
 
                 <Button Content="Verify File Integrity" Command="{Binding VerifyHashCommand}" Margin="0,5" />
 
                 <TextBlock Text="Test Basic Values:" FontWeight="Bold" Margin="0,5" />
-                <TextBox Text="{Binding TestResults}" TextWrapping="Wrap" 
-                         MinHeight="100" MaxHeight="200" IsReadOnly="True" 
-                         VerticalScrollBarVisibility="Auto" Margin="0,5" />
+                <TextBox Text="{Binding TestResults}"
+                         MinHeight="20" IsReadOnly="True" Margin="0,5" />
                 <Button Content="Test Hash Values" Command="{Binding TestHashValuesCommand}" Margin="0,5" />
             </StackPanel>
         </Grid>

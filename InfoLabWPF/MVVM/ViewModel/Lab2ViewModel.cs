@@ -12,9 +12,11 @@ namespace InfoLabWPF.MVVM.ViewModel
     public class Lab2ViewModel : INotifyPropertyChanged
     {
         private string _message = "";
-        private string _encryptedMessage;
-        private string _testResults;
-        private string _userNotification;
+        private string _encryptedMessage = "";
+        private string _testResults = "";
+        private string _userNotification = "";
+        private string _testHash = "";
+        
 
         private readonly MD5 _md5;
 
@@ -73,6 +75,16 @@ namespace InfoLabWPF.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        
+        public string TestHash
+        {
+            get => _testHash;
+            set
+            {
+                _testHash = value;
+                OnPropertyChanged();
+            }
+        }
 
         private void EncryptMessage()
         {
@@ -102,6 +114,12 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadInputFromFile()
         {
+            
+            Message = "";
+            OnPropertyChanged(nameof(Message)); 
+            
+            EncryptedMessage = "";
+            
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Load Input File"
@@ -151,6 +169,13 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void VerifyHash()
         {
+            
+            if (TestHash.Length != 32)
+            {
+                ShowError("The expected hash must be exactly 32 characters long.");
+                return;
+            }
+            
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Verify Input File"
@@ -160,21 +185,20 @@ namespace InfoLabWPF.MVVM.ViewModel
             {
                 try
                 {
+                    
                     _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
                     byte[] computedHash = _md5.ComputeHash(Encoding.UTF8.GetBytes(inputText));
-                    string expectedHash = EncryptedMessage; 
+                    string expectedHash = TestHash; 
                     string computedHashString = BitConverter.ToString(computedHash).Replace("-", "").ToUpper();
-                    
-                    MessageBox.Show($"Computed Hash: {computedHashString}\nExpected Hash: {expectedHash}", 
-                        "Debug Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string expectedHashString = expectedHash.Replace("-", "").ToUpper();
 
-                    if (computedHashString == expectedHash)
+                    if (computedHashString == expectedHashString)
                     {
-                        MessageBox.Show("Hash verification successful. The file hash matches the expected hash.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"Hash verification successful. The file hash matches the expected hash. \nComputed Hash: {computedHashString}\nExpected Hash: {expectedHash}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("Hash verification failed. The file hash does not match the expected hash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Hash verification failed. The file hash does not match the expected hash. \nComputed Hash: {computedHashString}\nExpected Hash: {expectedHash}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
                 catch (Exception ex)
@@ -199,3 +223,4 @@ namespace InfoLabWPF.MVVM.ViewModel
         }
     }
 }
+
