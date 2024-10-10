@@ -23,17 +23,15 @@ namespace InfoLabWPF.MVVM.ViewModel
         public Lab2ViewModel()
         {
             _md5 = new MD5();
-            EncryptCommand = new RelayCommand(EncryptMessage);
+            EncryptCommand = new AsyncRelayCommand(EncryptMessage);
             TestHashValuesCommand = new RelayCommand(TestHashValues);
-            LoadInputFromFileCommand = new RelayCommand(LoadInputFromFile);
             SaveHashToFileCommand = new RelayCommand(SaveHashToFile);
-            VerifyHashCommand = new RelayCommand(VerifyHash);
-            EncryptMessageFromFileCommand = new RelayCommand(EncryptMessageFromFile);
+            VerifyHashCommand = new AsyncRelayCommand(VerifyHash);
+            EncryptMessageFromFileCommand = new AsyncRelayCommand(EncryptMessageFromFile);
         }
 
         public ICommand EncryptCommand { get; }
         public ICommand TestHashValuesCommand { get; }
-        public ICommand LoadInputFromFileCommand { get; }
         public ICommand SaveHashToFileCommand { get; }
         public ICommand VerifyHashCommand { get; }
         public ICommand EncryptMessageFromFileCommand { get; }
@@ -88,13 +86,12 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private void EncryptMessage()
+        private async Task EncryptMessage()
         {
             byte[] messageBytes = Encoding.UTF8.GetBytes(Message);
-            byte[] hashBytes = _md5.ComputeHash(messageBytes);
+            byte[] hashBytes = await Task.Run(() => _md5.ComputeHash(messageBytes));
             EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
-            MessageBox.Show("Message encryption was successful.", "Success", MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            MessageBox.Show("Message encryption was successful.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void TestHashValues()
@@ -112,33 +109,6 @@ namespace InfoLabWPF.MVVM.ViewModel
                 results.AppendLine();
             }
             TestResults = results.ToString();
-        }
-
-        private void LoadInputFromFile()
-        {
-            Message = "";
-            OnPropertyChanged(nameof(Message));
-
-            EncryptedMessage = "";
-
-            var openFileDialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Title = "Load Input File"
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                try
-                {
-                    _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
-                    Message = inputText;
-                    UserNotification = "Loaded message from file. Type your own message to override.";
-                }
-                catch (Exception ex)
-                {
-                    ShowError($"Error loading input from file: {ex.Message}");
-                }
-            }
         }
 
         private void SaveHashToFile()
@@ -168,7 +138,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private async void VerifyHash()
+        private async Task VerifyHash()
         {
             if (TestHash.Length != 32)
             {
@@ -206,7 +176,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private async void EncryptMessageFromFile()
+        private async Task EncryptMessageFromFile()
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
@@ -219,7 +189,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 {
                     Message = "";
                     
-                    byte[] hashBytes = await _md5.ComputeHashFromFileAsync(openFileDialog.FileName);
+                    byte[] hashBytes = await Task.Run(() => _md5.ComputeHashFromFileAsync(openFileDialog.FileName));
                     EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
                     MessageBox.Show("Message encryption from file was successful.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
