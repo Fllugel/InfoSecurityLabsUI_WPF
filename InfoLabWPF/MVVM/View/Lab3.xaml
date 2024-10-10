@@ -3,10 +3,33 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:InfoLabWPF.MVVM.View"
+             xmlns:view="clr-namespace:InfoLabWPF.MVVM.View"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="600">
-    <Grid>
-        <TextBlock FontSize="50">Lab3 Under Development</TextBlock>
-    </Grid>
+             d:DesignHeight="900" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <StackPanel Margin="10">
+                <TextBlock FontSize="24" FontWeight="Bold" Text="RC5" />
+                
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Password Phrase" Margin="0,5" />
+                <TextBox Text="{Binding PasswordPhrase, UpdateSourceTrigger=PropertyChanged}" 
+                         MinHeight="20" MaxHeight="50" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
+                
+                <TextBlock FontSize="16" FontWeight="Bold" Text="File Encryption" Margin="0,5" />
+                <TextBlock Text="Select File to Encrypt:" VerticalAlignment="Center" Margin="0,5" />
+                <Button Content="Browse File" Command="{Binding SelectFileCommand}" />
+                <TextBlock Text="{Binding SelectedFileName}" Margin="5,3" Foreground="Gray" />
+                <ProgressBar Value="{Binding EncryptionProgress}" Height="20" Margin="0,5" />
+                <Button Content="Encrypt" Command="{Binding EncryptCommand}" Margin="0,5" />
+                
+                <TextBlock FontSize="16" FontWeight="Bold" Text="File Decryption" />
+                <TextBlock Text="Select File to Decrypt:" VerticalAlignment="Center" Margin="0,5" />
+                <Button Content="Browse File" Command="{Binding SelectDecryptFileCommand}" />
+                <TextBlock Text="{Binding SelectDecryptFileName}" Margin="5,3" Foreground="Gray" />
+                <ProgressBar Value="{Binding DecryptProgress}" Height="20" Margin="0,5" />
+                <Button Content="Decrypt" Command="{Binding DecryptCommand}" Margin="0,5" />
+                
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
