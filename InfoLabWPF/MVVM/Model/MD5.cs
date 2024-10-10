@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ public class MD5
     private readonly uint[] _s = new uint[] { 7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21 };
     private readonly uint[] _k = new uint[64];
     private readonly uint[] _state = new uint[4];
+    private ulong _totalLength;
 
     public MD5()
     {
@@ -17,37 +19,18 @@ public class MD5
 
     public byte[] ComputeHash(byte[] input)
     {
-        return Task.Run(() => ComputeHashAsync(input)).GetAwaiter().GetResult();
-    }
-    
-    private async Task<byte[]> ComputeHashAsync(byte[] input)
-    {
-        return await Task.Run(() =>
+        Initialize();
+        _totalLength = (ulong)input.Length * 8;
+        byte[] paddedInput = PadInput(input);
+        uint[] M = new uint[16];
+
+        for (int i = 0; i < paddedInput.Length; i += 64)
         {
-            Initialize();
+            Buffer.BlockCopy(paddedInput, i, M, 0, 64);
+            ProcessChunk(M);
+        }
 
-            // Step 1: Padding the input
-            byte[] paddedInput = PadInput(input);
-    
-            // Step 2: Initialize MD5 buffer
-            uint[] M = new uint[16];
-    
-            // Step 3: Process each 512-bit chunk
-            for (int i = 0; i < paddedInput.Length; i += 64)
-            {
-                Buffer.BlockCopy(paddedInput, i, M, 0, 64);
-                
-                for (int j = 0; j < 16; j++)
-                {
-                    M[j] = BitConverter.ToUInt32(paddedInput, i + j * 4);
-                }
-
-                ProcessChunk(M);
-            }
-    
-            // Step 4: Output hash
-            return GetResult();
-        });
+        return GetResult();
     }
 
     public async Task<byte[]> ComputeHashFromFileAsync(string filePath)
@@ -57,29 +40,23 @@ public class MD5
             throw new FileNotFoundException("Input file not found.", filePath);
         }
 
-        Initialize();
+        byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+        return ComputeHash(fileBytes);
+    }
 
-        try
+    public void LoadInputFromFile(string filePath, out string inputText)
+    {
+        if (!File.Exists(filePath))
         {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
-                    byte[] chunk = new byte[bytesRead];
-                    Array.Copy(buffer, chunk, bytesRead);
-                    UpdateHash(chunk);
-                }
-            }
-        }
-        catch (Exception)
-        {
-            throw new IOException("Error reading the file.");
+            throw new FileNotFoundException("Input file not found.", filePath);
         }
 
-        return FinalizeHash();
+        inputText = File.ReadAllText(filePath);
+    }
+
+    public void SaveHashToFile(string filePath, string hash)
+    {
+        File.WriteAllText(filePath, hash);
     }
 
     private void Initialize()
@@ -101,15 +78,15 @@ public class MD5
     private byte[] PadInput(byte[] input)
     {
         int originalLength = input.Length;
-        int paddingLength = (56 - (input.Length + 1) % 64) % 64;
-        byte[] padded = new byte[originalLength + paddingLength + 9]; 
+        int paddingLength = (56 - (input.Length + 1) % 64 + 64) % 64;
+        byte[] padded = new byte[originalLength + paddingLength + 8 + 1];
 
         Buffer.BlockCopy(input, 0, padded, 0, originalLength);
-        padded[originalLength] = 0x80; 
+        padded[originalLength] = 0x80;
 
         ulong lengthBits = (ulong)originalLength * 8;
         byte[] lengthBytes = BitConverter.GetBytes(lengthBits);
-        
+
         if (BitConverter.IsLittleEndian)
         {
             Buffer.BlockCopy(lengthBytes, 0, padded, padded.Length - 8, 8);
@@ -169,7 +146,7 @@ public class MD5
         for (int i = 0; i < 4; i++)
         {
             byte[] temp = BitConverter.GetBytes(_state[i]);
-            
+
             if (BitConverter.IsLittleEndian)
             {
                 Buffer.BlockCopy(temp, 0, result, i * 4, 4);
@@ -181,74 +158,5 @@ public class MD5
     private uint RotateLeft(uint x, int n)
     {
         return (x << n) | (x >> (32 - n));
-    }
-
-    public async Task<string> LoadInputFromFileAsync(string filePath)
-    {
-        if (!File.Exists(filePath))
-        {
-            throw new FileNotFoundException("Input file not found.", filePath);
-        }
-
-        StringBuilder contentBuilder = new StringBuilder();
-
-        try
-        {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            using (var reader = new StreamReader(stream))
-            {
-                char[] buffer = new char[4096];
-                int bytesRead;
-
-                while ((bytesRead = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
-                    contentBuilder.Append(buffer, 0, bytesRead);
-                }
-            }
-        }
-        catch (Exception)
-        {
-            return string.Empty;
-        }
-
-        return contentBuilder.ToString();
-    }
-    
-    public void LoadInputFromFile(string filePath, out string inputText)
-    {
-        inputText = Task.Run(() => LoadInputFromFileAsync(filePath)).GetAwaiter().GetResult();
-    }
-
-    public void SaveHashToFile(string filePath, string content)
-    {
-        File.WriteAllText(filePath, content);
-    }
-
-    public void InitializeHash()
-    {
-        Initialize();
-    }
-
-    public void UpdateHash(byte[] input)
-    {
-        byte[] paddedInput = PadInput(input);
-        uint[] M = new uint[16];
-
-        for (int i = 0; i < paddedInput.Length; i += 64)
-        {
-            Buffer.BlockCopy(paddedInput, i, M, 0, 64);
-
-            for (int j = 0; j < 16; j++)
-            {
-                M[j] = BitConverter.ToUInt32(paddedInput, i + j * 4);
-            }
-
-            ProcessChunk(M);
-        }
-    }
-
-    public byte[] FinalizeHash()
-    {
-        return GetResult();
     }
 }

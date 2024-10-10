@@ -217,6 +217,8 @@ namespace InfoLabWPF.MVVM.ViewModel
             {
                 try
                 {
+                    Message = "";
+                    
                     byte[] hashBytes = await _md5.ComputeHashFromFileAsync(openFileDialog.FileName);
                     EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
                     MessageBox.Show("Message encryption from file was successful.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
