@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -16,7 +17,6 @@ namespace InfoLabWPF.MVVM.ViewModel
         private string _testResults = "";
         private string _userNotification = "";
         private string _testHash = "";
-        
 
         private readonly MD5 _md5;
 
@@ -28,6 +28,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             LoadInputFromFileCommand = new RelayCommand(LoadInputFromFile);
             SaveHashToFileCommand = new RelayCommand(SaveHashToFile);
             VerifyHashCommand = new RelayCommand(VerifyHash);
+            EncryptMessageFromFileCommand = new RelayCommand(EncryptMessageFromFile);
         }
 
         public ICommand EncryptCommand { get; }
@@ -35,6 +36,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand LoadInputFromFileCommand { get; }
         public ICommand SaveHashToFileCommand { get; }
         public ICommand VerifyHashCommand { get; }
+        public ICommand EncryptMessageFromFileCommand { get; }
 
         public string Message
         {
@@ -42,7 +44,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             set
             {
                 _message = value;
-                UserNotification = "";  
+                UserNotification = "";
             }
         }
 
@@ -75,7 +77,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        
+
         public string TestHash
         {
             get => _testHash;
@@ -114,12 +116,11 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadInputFromFile()
         {
-            
             Message = "";
-            OnPropertyChanged(nameof(Message)); 
-            
+            OnPropertyChanged(nameof(Message));
+
             EncryptedMessage = "";
-            
+
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Load Input File"
@@ -130,8 +131,8 @@ namespace InfoLabWPF.MVVM.ViewModel
                 try
                 {
                     _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
-                    Message = inputText;  
-                    UserNotification = "Loaded message from file. Type your own message to override."; 
+                    Message = inputText;
+                    UserNotification = "Loaded message from file. Type your own message to override.";
                 }
                 catch (Exception ex)
                 {
@@ -167,15 +168,14 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private void VerifyHash()
+        private async void VerifyHash()
         {
-            
             if (TestHash.Length != 32)
             {
                 ShowError("The expected hash must be exactly 32 characters long.");
                 return;
             }
-            
+
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Verify Input File"
@@ -185,10 +185,8 @@ namespace InfoLabWPF.MVVM.ViewModel
             {
                 try
                 {
-                    
-                    _md5.LoadInputFromFile(openFileDialog.FileName, out string inputText);
-                    byte[] computedHash = _md5.ComputeHash(Encoding.UTF8.GetBytes(inputText));
-                    string expectedHash = TestHash; 
+                    byte[] computedHash = await _md5.ComputeHashFromFileAsync(openFileDialog.FileName);
+                    string expectedHash = TestHash;
                     string computedHashString = BitConverter.ToString(computedHash).Replace("-", "").ToUpper();
                     string expectedHashString = expectedHash.Replace("-", "").ToUpper();
 
@@ -208,7 +206,27 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
+        private async void EncryptMessageFromFile()
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select File to Encrypt"
+            };
 
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    byte[] hashBytes = await _md5.ComputeHashFromFileAsync(openFileDialog.FileName);
+                    EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
+                    MessageBox.Show("Message encryption from file was successful.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    ShowError($"Error encrypting message from file: {ex.Message}");
+                }
+            }
+        }
 
         private void ShowError(string message)
         {
@@ -223,4 +241,3 @@ namespace InfoLabWPF.MVVM.ViewModel
         }
     }
 }
-

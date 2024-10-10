@@ -50,6 +50,37 @@ public class MD5
         });
     }
 
+    public async Task<byte[]> ComputeHashFromFileAsync(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException("Input file not found.", filePath);
+        }
+
+        Initialize();
+
+        try
+        {
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    byte[] chunk = new byte[bytesRead];
+                    Array.Copy(buffer, chunk, bytesRead);
+                    UpdateHash(chunk);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            throw new IOException("Error reading the file.");
+        }
+
+        return FinalizeHash();
+    }
 
     private void Initialize()
     {
@@ -151,6 +182,7 @@ public class MD5
     {
         return (x << n) | (x >> (32 - n));
     }
+
     public async Task<string> LoadInputFromFileAsync(string filePath)
     {
         if (!File.Exists(filePath))
@@ -187,9 +219,36 @@ public class MD5
         inputText = Task.Run(() => LoadInputFromFileAsync(filePath)).GetAwaiter().GetResult();
     }
 
-
     public void SaveHashToFile(string filePath, string content)
     {
         File.WriteAllText(filePath, content);
+    }
+
+    public void InitializeHash()
+    {
+        Initialize();
+    }
+
+    public void UpdateHash(byte[] input)
+    {
+        byte[] paddedInput = PadInput(input);
+        uint[] M = new uint[16];
+
+        for (int i = 0; i < paddedInput.Length; i += 64)
+        {
+            Buffer.BlockCopy(paddedInput, i, M, 0, 64);
+
+            for (int j = 0; j < 16; j++)
+            {
+                M[j] = BitConverter.ToUInt32(paddedInput, i + j * 4);
+            }
+
+            ProcessChunk(M);
+        }
+    }
+
+    public byte[] FinalizeHash()
+    {
+        return GetResult();
     }
 }
