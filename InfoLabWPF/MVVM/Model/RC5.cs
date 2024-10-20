@@ -100,28 +100,30 @@ public class RC5
         int paddedLength = ((data.Length + blockSize - 1) / blockSize) * blockSize;
         byte[] paddedData = new byte[paddedLength];
         Array.Copy(data, paddedData, data.Length);
-
+    
         byte[] encrypted = new byte[paddedLength];
         byte[] prevBlock = new byte[blockSize];
         Array.Copy(_iv, 0, prevBlock, 0, Math.Min(_iv.Length, blockSize));
-
+    
         for (int i = 0; i < paddedLength; i += blockSize)
         {
             uint A = BitConverter.ToUInt32(paddedData, i);
             uint B = BitConverter.ToUInt32(prevBlock, 0);
-
-            A ^= B;
-
+    
+            A ^= B; // XOR with the previous block or IV
+    
             EncryptBlock(ref A, ref B);
-
+    
             Array.Copy(BitConverter.GetBytes(A), 0, encrypted, i, 4);
-            Array.Copy(BitConverter.GetBytes(B), 0, prevBlock, 0, 4);
-            Array.Copy(BitConverter.GetBytes(A), 0, prevBlock, 0, 4);
+            Array.Copy(BitConverter.GetBytes(B), 0, encrypted, i + 4, 4); // Store encrypted B
+    
+            Array.Copy(BitConverter.GetBytes(A), 0, prevBlock, 0, 4); // Update prevBlock for next round
+            Array.Copy(BitConverter.GetBytes(B), 0, prevBlock, 0, 4); // Update prevBlock for next round
         }
-
+    
         return encrypted;
     }
-
+    
     public byte[] Decrypt(byte[] data)
     {
         int blockSize = _wordSize / 8;
@@ -129,27 +131,28 @@ public class RC5
         {
             throw new ArgumentException("Invalid data length, must be a multiple of the block size.");
         }
-
+    
         byte[] decrypted = new byte[data.Length];
         byte[] prevBlock = new byte[blockSize];
         Array.Copy(_iv, 0, prevBlock, 0, Math.Min(_iv.Length, blockSize));
-
+    
         for (int i = 0; i < data.Length; i += blockSize)
         {
             uint A = BitConverter.ToUInt32(data, i);
-            uint B = BitConverter.ToUInt32(prevBlock, 0);
-
-            uint originalA = A;
-            uint originalB = B;
-
-            DecryptBlock(ref A, ref B);
-
-            A ^= B;
-
-            Array.Copy(BitConverter.GetBytes(A), 0, decrypted, i, 4);
-            Array.Copy(BitConverter.GetBytes(originalA), 0, prevBlock, 0, 4);
+            uint B = BitConverter.ToUInt32(data, i + 4); // Get B from the encrypted data
+    
+            uint tempA = A;
+            uint tempB = B;
+    
+            DecryptBlock(ref tempA, ref tempB);
+    
+            tempA ^= BitConverter.ToUInt32(prevBlock, 0); // XOR with the previous encrypted block
+    
+            Array.Copy(BitConverter.GetBytes(tempA), 0, decrypted, i, 4);
+            Array.Copy(BitConverter.GetBytes(B), 0, prevBlock, 0, 4); // Use the encrypted B for the next round
         }
-
+    
         return decrypted;
     }
+
 }
