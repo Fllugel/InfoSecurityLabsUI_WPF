@@ -26,7 +26,10 @@ namespace InfoLabWPF.MVVM.ViewModel
     public Lab3ViewModel()
     {
         _md5 = new MD5();
+        
         _configLoader = new ConfigLoader();
+        _configLoader.LoadConfigLab3();
+        
         EncryptCommand = new RelayCommand(EncryptFile);
         DecryptCommand = new RelayCommand(DecryptFile);
         SelectFileCommand = new RelayCommand(SelectFile);

@@ -19,12 +19,6 @@ public class ConfigLoader
     public int Lab3RC5Rounds { get; private set; }
     public int Lab3PasswordPhraseLength { get; private set; }
 
-    public ConfigLoader()
-    {
-        LoadConfigLab1();
-        LoadConfigLab3();
-    }
-
     private void LoadConfigLab1()
     {
         Lab1Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab1.Modulus"]);

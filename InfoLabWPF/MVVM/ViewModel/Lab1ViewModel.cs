@@ -229,6 +229,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         private void LoadVariantData()
         {
             ConfigLoader configLoader = new ConfigLoader();
+            configLoader.LoadConfigLab1();
 
             Modulus = configLoader.Lab1Modulus.ToString(); 
             Multiplier = configLoader.Lab1Multiplier.ToString();  
