@@ -6,12 +6,18 @@ public class RC5
     private int _wordSize;
     private int _rounds;
     private uint[] _S;
-    private byte[] _iv;
+    private uint _lcgModulus;
+    private uint _lcgMultiplier;
+    private uint _lcgIncrement;
+    private uint _lcgSeed;
 
     public RC5(byte[] key, uint lcgModulus, uint lcgMultiplier, uint lcgIncrement, uint lcgSeed, int wordSize = 32, int rounds = 12)
     {
+        _lcgModulus = lcgModulus;
+        _lcgMultiplier = lcgMultiplier;
+        _lcgIncrement = lcgIncrement;
+        _lcgSeed = lcgSeed;
         Initialize(key, wordSize, rounds);
-        _iv = GenerateIVUsingLCG(lcgModulus, lcgMultiplier, lcgIncrement, lcgSeed);
     }
 
     private void Initialize(byte[] key, int wordSize, int rounds)
@@ -100,10 +106,25 @@ public class RC5
         int paddedLength = ((data.Length + blockSize - 1) / blockSize) * blockSize;
         byte[] paddedData = new byte[paddedLength];
         Array.Copy(data, paddedData, data.Length);
-    
-        byte[] encrypted = new byte[paddedLength];
+
+        byte[] encrypted = new byte[paddedLength + blockSize];
+        byte[] iv = GenerateIVUsingLCG(_lcgModulus, _lcgMultiplier, _lcgIncrement, _lcgSeed);
+
+        // Debug: Output the original IV
+        Console.WriteLine("Original IV: " + BitConverter.ToString(iv));
+
+        // Encrypt IV using ECB mode and store it as the first block
+        uint ivA = BitConverter.ToUInt32(iv, 0);
+        uint ivB = BitConverter.ToUInt32(iv, 4);
+        EncryptBlock(ref ivA, ref ivB);
+        Array.Copy(BitConverter.GetBytes(ivA), 0, encrypted, 0, 4);
+        Array.Copy(BitConverter.GetBytes(ivB), 0, encrypted, 4, 4);
+
+        // Debug: Output the encoded IV
+        Console.WriteLine("Encoded IV: " + BitConverter.ToString(encrypted, 0, blockSize));
+
         byte[] prevBlock = new byte[blockSize];
-        Array.Copy(_iv, 0, prevBlock, 0, Math.Min(_iv.Length, blockSize));
+        Array.Copy(iv, 0, prevBlock, 0, blockSize);
 
         for (int i = 0; i < paddedLength; i += blockSize)
         {
@@ -118,8 +139,8 @@ public class RC5
 
             EncryptBlock(ref A, ref B);
 
-            Array.Copy(BitConverter.GetBytes(A), 0, encrypted, i, 4);
-            Array.Copy(BitConverter.GetBytes(B), 0, encrypted, i + 4, 4);
+            Array.Copy(BitConverter.GetBytes(A), 0, encrypted, i + blockSize, 4);
+            Array.Copy(BitConverter.GetBytes(B), 0, encrypted, i + blockSize + 4, 4);
 
             Array.Copy(BitConverter.GetBytes(A), 0, prevBlock, 0, 4);
             Array.Copy(BitConverter.GetBytes(B), 0, prevBlock, 4, 4);
@@ -136,11 +157,23 @@ public class RC5
             throw new ArgumentException("Invalid data length, must be a multiple of the block size.");
         }
 
-        byte[] decrypted = new byte[data.Length];
-        byte[] prevBlock = new byte[blockSize];
-        Array.Copy(_iv, 0, prevBlock, 0, Math.Min(_iv.Length, blockSize));
+        byte[] decrypted = new byte[data.Length - blockSize];
 
-        for (int i = 0; i < data.Length; i += blockSize)
+        // Decrypt the first block to retrieve the IV
+        uint ivA = BitConverter.ToUInt32(data, 0);
+        uint ivB = BitConverter.ToUInt32(data, 4);
+        DecryptBlock(ref ivA, ref ivB);
+        byte[] iv = new byte[blockSize];
+        Array.Copy(BitConverter.GetBytes(ivA), 0, iv, 0, 4);
+        Array.Copy(BitConverter.GetBytes(ivB), 0, iv, 4, 4);
+
+        // Debug: Output the decoded IV
+        Console.WriteLine("Decoded IV: " + BitConverter.ToString(iv));
+
+        byte[] prevBlock = new byte[blockSize];
+        Array.Copy(iv, 0, prevBlock, 0, blockSize);
+
+        for (int i = blockSize; i < data.Length; i += blockSize)
         {
             uint A = BitConverter.ToUInt32(data, i);
             uint B = BitConverter.ToUInt32(data, i + 4);
@@ -156,8 +189,8 @@ public class RC5
             A ^= prevA;
             B ^= prevB;
 
-            Array.Copy(BitConverter.GetBytes(A), 0, decrypted, i, 4);
-            Array.Copy(BitConverter.GetBytes(B), 0, decrypted, i + 4, 4);
+            Array.Copy(BitConverter.GetBytes(A), 0, decrypted, i - blockSize, 4);
+            Array.Copy(BitConverter.GetBytes(B), 0, decrypted, i - blockSize + 4, 4);
 
             Array.Copy(BitConverter.GetBytes(originalA), 0, prevBlock, 0, 4);
             Array.Copy(BitConverter.GetBytes(originalB), 0, prevBlock, 4, 4);
