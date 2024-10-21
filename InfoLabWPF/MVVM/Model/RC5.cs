@@ -6,17 +6,12 @@ public class RC5
     private int _wordSize;
     private int _rounds;
     private uint[] _S;
-    private uint _lcgModulus;
-    private uint _lcgMultiplier;
-    private uint _lcgIncrement;
-    private uint _lcgSeed;
+    private LinearCongruentialGenerator _lcg;
 
     public RC5(byte[] key, uint lcgModulus, uint lcgMultiplier, uint lcgIncrement, uint lcgSeed, int wordSize = 32, int rounds = 12)
     {
-        _lcgModulus = lcgModulus;
-        _lcgMultiplier = lcgMultiplier;
-        _lcgIncrement = lcgIncrement;
-        _lcgSeed = lcgSeed;
+
+        _lcg = new LinearCongruentialGenerator(lcgModulus, lcgMultiplier, lcgIncrement, lcgSeed);
         Initialize(key, wordSize, rounds);
     }
 
@@ -64,14 +59,13 @@ public class RC5
         return (value >> count) | (value << (_wordSize - count));
     }
 
-    private byte[] GenerateIVUsingLCG(uint modulus, uint multiplier, uint increment, uint seed)
+    private byte[] GenerateIVUsingLCG()
     {
-        var lcg = new LinearCongruentialGenerator(modulus, multiplier, increment, seed);
         int blockSize = _wordSize / 8;
         byte[] iv = new byte[blockSize];
         for (int i = 0; i < iv.Length; i += 4)
         {
-            uint nextValue = lcg.Next();
+            uint nextValue = _lcg.Next();
             byte[] bytes = BitConverter.GetBytes(nextValue);
             Array.Copy(bytes, 0, iv, i, Math.Min(4, iv.Length - i));
         }
@@ -108,9 +102,8 @@ public class RC5
         Array.Copy(data, paddedData, data.Length);
 
         byte[] encrypted = new byte[paddedLength + blockSize];
-        byte[] iv = GenerateIVUsingLCG(_lcgModulus, _lcgMultiplier, _lcgIncrement, _lcgSeed);
+        byte[] iv = GenerateIVUsingLCG();
 
-        // Debug: Output the original IV
         Console.WriteLine("Original IV: " + BitConverter.ToString(iv));
 
         // Encrypt IV using ECB mode and store it as the first block
@@ -120,7 +113,6 @@ public class RC5
         Array.Copy(BitConverter.GetBytes(ivA), 0, encrypted, 0, 4);
         Array.Copy(BitConverter.GetBytes(ivB), 0, encrypted, 4, 4);
 
-        // Debug: Output the encoded IV
         Console.WriteLine("Encoded IV: " + BitConverter.ToString(encrypted, 0, blockSize));
 
         byte[] prevBlock = new byte[blockSize];
@@ -167,7 +159,6 @@ public class RC5
         Array.Copy(BitConverter.GetBytes(ivA), 0, iv, 0, 4);
         Array.Copy(BitConverter.GetBytes(ivB), 0, iv, 4, 4);
 
-        // Debug: Output the decoded IV
         Console.WriteLine("Decoded IV: " + BitConverter.ToString(iv));
 
         byte[] prevBlock = new byte[blockSize];
