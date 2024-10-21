@@ -19,7 +19,7 @@ public class ConfigLoader
     public int Lab3RC5Rounds { get; private set; }
     public int Lab3PasswordPhraseLength { get; private set; }
 
-    private void LoadConfigLab1()
+    public void LoadConfigLab1()
     {
         Lab1Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab1.Modulus"]);
         Lab1Multiplier = uint.Parse(ConfigurationManager.AppSettings["Lab1.Multiplier"]);
@@ -27,18 +27,7 @@ public class ConfigLoader
         Lab1Seed = uint.Parse(ConfigurationManager.AppSettings["Lab1.Seed"]);
         Lab1SequenceCount = uint.Parse(ConfigurationManager.AppSettings["Lab1.SequenceCount"]);
     }
-
-    private void LoadConfigLab3()
-    {
-        Lab3MD5Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Modulus"]);
-        Lab3MD5Multiplier = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Multiplier"]);
-        Lab3MD5Increment = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Increment"]);
-        Lab3MD5Seed = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Seed"]);
-        Lab3RC5WordSize = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.WordSize"]);
-        Lab3RC5Rounds = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Rounds"]);
-        Lab3PasswordPhraseLength = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.PasswordPhraseLength"]);
-    }
-
+    
     public List<(string Input, string Expected)> LoadConfigLab2()
     {
         var testValues = new List<(string Input, string Expected)>();
@@ -59,5 +48,16 @@ public class ConfigLoader
         }
 
         return testValues;
+    }
+
+    public void LoadConfigLab3()
+    {
+        Lab3MD5Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Modulus"]);
+        Lab3MD5Multiplier = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Multiplier"]);
+        Lab3MD5Increment = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Increment"]);
+        Lab3MD5Seed = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Seed"]);
+        Lab3RC5WordSize = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.WordSize"]);
+        Lab3RC5Rounds = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Rounds"]);
+        Lab3PasswordPhraseLength = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.PasswordPhraseLength"]);
     }
 }
