@@ -44,7 +44,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             _passwordPhrase = GetEncryptionKeyFromPassword(value, _configLoader.Lab3PasswordPhraseLength);
             byte[] passwordBytes = BitArrayToByteArray(_passwordPhrase);
-            _rc5 = new RC5(passwordBytes, _configLoader.Lab3RC5Modulus, _configLoader.Lab3RC5Multiplier, _configLoader.Lab3RC5Increment, _configLoader.Lab3RC5Seed, _configLoader.Lab3RC5WordSize, _configLoader.Lab3RC5Rounds);
+            _rc5 = new RC5(passwordBytes, _configLoader.Lab3MD5Modulus, _configLoader.Lab3MD5Multiplier, _configLoader.Lab3MD5Increment, _configLoader.Lab3MD5Seed, _configLoader.Lab3RC5WordSize, _configLoader.Lab3RC5Rounds);
             OnPropertyChanged();
         }
     }

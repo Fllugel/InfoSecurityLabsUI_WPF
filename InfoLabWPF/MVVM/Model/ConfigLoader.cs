@@ -11,10 +11,10 @@ public class ConfigLoader
     public uint Lab1Seed { get; private set; }
     public uint Lab1SequenceCount { get; private set; }
 
-    public uint Lab3RC5Modulus { get; private set; }
-    public uint Lab3RC5Multiplier { get; private set; }
-    public uint Lab3RC5Increment { get; private set; }
-    public uint Lab3RC5Seed { get; private set; }
+    public uint Lab3MD5Modulus { get; private set; }
+    public uint Lab3MD5Multiplier { get; private set; }
+    public uint Lab3MD5Increment { get; private set; }
+    public uint Lab3MD5Seed { get; private set; }
     public int Lab3RC5WordSize { get; private set; }
     public int Lab3RC5Rounds { get; private set; }
     public int Lab3PasswordPhraseLength { get; private set; }
@@ -36,13 +36,13 @@ public class ConfigLoader
 
     private void LoadConfigLab3()
     {
-        Lab3RC5Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Modulus"]);
-        Lab3RC5Multiplier = uint.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Multiplier"]);
-        Lab3RC5Increment = uint.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Increment"]);
-        Lab3RC5Seed = uint.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Seed"]);
+        Lab3MD5Modulus = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Modulus"]);
+        Lab3MD5Multiplier = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Multiplier"]);
+        Lab3MD5Increment = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Increment"]);
+        Lab3MD5Seed = uint.Parse(ConfigurationManager.AppSettings["Lab3.MD5.Seed"]);
         Lab3RC5WordSize = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.WordSize"]);
         Lab3RC5Rounds = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.Rounds"]);
-        Lab3PasswordPhraseLength = int.Parse(ConfigurationManager.AppSettings["Lab3.PasswordPhraseLength"]);
+        Lab3PasswordPhraseLength = int.Parse(ConfigurationManager.AppSettings["Lab3.RC5.PasswordPhraseLength"]);
     }
 
     public List<(string Input, string Expected)> LoadConfigLab2()
