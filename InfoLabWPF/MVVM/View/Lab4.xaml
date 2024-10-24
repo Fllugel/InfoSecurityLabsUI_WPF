@@ -3,10 +3,55 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:InfoLabWPF.MVVM.View"
+             xmlns:viewModel="clr-namespace:InfoLabWPF.MVVM.ViewModel"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="600">
-    <Grid>
-        <TextBlock FontSize="50">Lab4 Under Development</TextBlock>
-    </Grid>
+             d:DesignHeight="900" d:DesignWidth="600">
+    <UserControl.DataContext>
+        <viewModel:Lab4ViewModel />
+    </UserControl.DataContext>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <StackPanel Margin="10">
+                <TextBlock FontSize="24" FontWeight="Bold" Text="RSA Encryption" />
+
+                <Button Content="Generate Keys" Command="{Binding GenerateKeysCommand}" Margin="0,5" />
+
+                <TextBlock Text="Public Key:" Margin="0,0" />
+                <TextBox Text="{Binding PublicKey}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Save Public Key" Command="{Binding SavePublicKeyCommand}" Margin="0,5" />
+                    <Button Grid.Column="1" Content="Load Public Key" Command="{Binding LoadPublicKeyCommand}" Margin="0,5" />
+                </Grid>
+
+                <TextBlock Text="Private Key:" Margin="0,0" />
+                <TextBox Text="{Binding PrivateKey}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Save Private Key" Command="{Binding SavePrivateKeyCommand}" Margin="0,5" />
+                    <Button Grid.Column="1" Content="Load Private Key" Command="{Binding LoadPrivateKeyCommand}" Margin="0,5" />
+                </Grid>
+
+                <TextBlock FontSize="16" FontWeight="Bold" Text="File Encryption" Margin="0,0" />
+                <TextBlock Text="Select File to Encrypt:" VerticalAlignment="Center" Margin="0,0" />
+                <Button Content="Browse File" Command="{Binding SelectFileCommand}" />
+                <TextBlock Text="{Binding SelectedFileName}" Margin="5,3" Foreground="Gray" />
+                <Button Content="Encrypt" Command="{Binding EncryptCommand}" Margin="0,5" />
+
+                <TextBlock FontSize="16" FontWeight="Bold" Text="File Decryption" />
+                <TextBlock Text="Select File to Decrypt:" VerticalAlignment="Center" Margin="0,0" />
+                <Button Content="Browse File" Command="{Binding SelectDecryptFileCommand}" />
+                <TextBlock Text="{Binding SelectDecryptFileName}" Margin="5,3" Foreground="Gray" />
+                <Button Content="Decrypt" Command="{Binding DecryptCommand}" Margin="0,5" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
