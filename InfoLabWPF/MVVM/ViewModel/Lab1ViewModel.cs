@@ -11,7 +11,6 @@ namespace InfoLabWPF.MVVM.ViewModel
 {
     public class Lab1ViewModel : INotifyPropertyChanged
     {
-        // Private Fields
         private LinearCongruentialGenerator _lcg;
         private GCDTest _gcdTest;
         private List<uint> _sequence;
@@ -24,10 +23,8 @@ namespace InfoLabWPF.MVVM.ViewModel
         private double _piBuiltInEstimate;
         private uint _period;
 
-        // Constructor
         public Lab1ViewModel()
         {
-            // Initializing commands
             GenerateCommand = new RelayCommand(GenerateSequence);
             EstimatePiCommand = new RelayCommand(EstimatePi);
             EstimatePiBuiltInCommand = new RelayCommand(EstimatePiBuiltIn);
@@ -37,7 +34,6 @@ namespace InfoLabWPF.MVVM.ViewModel
             _gcdTest = new GCDTest();
         }
 
-        // Commands
         public ICommand GenerateCommand { get; }
         public ICommand EstimatePiCommand { get; }
         public ICommand EstimatePiBuiltInCommand { get; }
@@ -45,7 +41,6 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand FindPeriodCommand { get; }
         public ICommand SaveSequenceCommand { get; }
 
-        // Properties with string input and validation
         public string Modulus
         {
             get => _modulus.ToString();
@@ -181,7 +176,6 @@ namespace InfoLabWPF.MVVM.ViewModel
         public double PiDeviation => PiEstimate == 0 ? 0 : Math.Abs(Math.PI - PiEstimate);
         public double PiBuiltInDeviation => PiBuiltInEstimate == 0 ? 0 : Math.Abs(Math.PI - PiBuiltInEstimate);
 
-        // Methods
         private void GenerateSequence()
         {
             _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
@@ -243,7 +237,6 @@ namespace InfoLabWPF.MVVM.ViewModel
             MessageBox.Show(message, "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        // INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
