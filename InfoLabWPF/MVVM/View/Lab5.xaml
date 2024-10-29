@@ -3,10 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:InfoLabWPF.MVVM.View"
+             xmlns:viewModel="clr-namespace:InfoLabWPF.MVVM.ViewModel"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="600">
-    <Grid>
-        <TextBlock FontSize="50">Lab5 Under Development</TextBlock>
-    </Grid>
+             d:DesignHeight="900" d:DesignWidth="600">
+    <UserControl.DataContext>
+        <viewModel:Lab5ViewModel />
+    </UserControl.DataContext>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <StackPanel Margin="10">
+                <TextBlock FontSize="24" FontWeight="Bold" Text="DSS Digital Signature" />
+
+                <Button Content="Generate Keys" Command="{Binding GenerateKeysCommand}" Margin="0,5" />
+
+                <TextBlock Text="Public Key:" Margin="0,0" />
+                <TextBox Text="{Binding PublicKey}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Save Public Key" Command="{Binding SavePublicKeyCommand}" Margin="0,5" />
+                    <Button Grid.Column="1" Content="Load Public Key" Command="{Binding LoadPublicKeyCommand}" Margin="0,5" />
+                </Grid>
+
+                <TextBlock Text="Private Key:" Margin="0,0" />
+                <TextBox Text="{Binding PrivateKey}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Save Private Key" Command="{Binding SavePrivateKeyCommand}" Margin="0,5" />
+                    <Button Grid.Column="1" Content="Load Private Key" Command="{Binding LoadPrivateKeyCommand}" Margin="0,5" />
+                </Grid>
+
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Sign Message" Margin="0,0" />
+                <TextBlock Text="Enter Message:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding MessageToSign, UpdateSourceTrigger=PropertyChanged}" 
+                         MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap" 
+                         VerticalScrollBarVisibility="Auto" />
+                <Button Content="Sign Message" Command="{Binding SignMessageCommand}" Margin="0,5" />
+                <TextBlock Text="Signature:" Margin="0,5" />
+                <TextBox Text="{Binding MessageSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Sign File" Margin="0,0" />
+                <TextBlock Text="Select File to Sign:" VerticalAlignment="Center" Margin="0,5" />
+                <Button Content="Browse File" Command="{Binding SelectFileToSignCommand}" />
+                <TextBlock Text="{Binding SelectedFileNameToSign}" Margin="5,3" Foreground="Gray" />
+                <Button Content="Sign File" Command="{Binding SignFileCommand}" Margin="0,5" />
+                <TextBlock Text="File Signature:" Margin="0,5" />
+                <TextBox Text="{Binding FileSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature" Margin="0,0" />
+                <TextBlock Text="Select File to Verify:" VerticalAlignment="Center" Margin="0,5" />
+                <Button Content="Browse File" Command="{Binding SelectFileToVerifyCommand}" />
+                <TextBlock Text="{Binding SelectedFileNameToVerify}" Margin="5,3" Foreground="Gray" />
+                <TextBlock Text="Enter Signature:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding SignatureToVerify, UpdateSourceTrigger=PropertyChanged}" 
+                         MinHeight="20" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
+                <Button Content="Verify Signature" Command="{Binding VerifySignatureCommand}" Margin="0,5" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
