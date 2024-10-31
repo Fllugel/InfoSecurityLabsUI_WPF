@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModel="clr-namespace:InfoLabWPF.MVVM.ViewModel"
              mc:Ignorable="d"
-             d:DesignHeight="900" d:DesignWidth="600">
+             d:DesignHeight="1200" d:DesignWidth="600">
     <UserControl.DataContext>
         <viewModel:Lab5ViewModel />
     </UserControl.DataContext>
@@ -42,22 +42,32 @@
 
                 <TextBlock FontSize="16" FontWeight="Bold" Text="Sign Message" Margin="0,0" />
                 <TextBlock Text="Enter Message:" VerticalAlignment="Center" Margin="0,5" />
-                <TextBox Text="{Binding MessageToSign, UpdateSourceTrigger=PropertyChanged}" 
-                         MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap" 
+                <TextBox Text="{Binding MessageToSign, UpdateSourceTrigger=PropertyChanged}"
+                         MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto" />
                 <Button Content="Sign Message" Command="{Binding SignMessageCommand}" Margin="0,5" />
                 <TextBlock Text="Signature:" Margin="0,5" />
                 <TextBox Text="{Binding MessageSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
-                
-                <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature from Text" Margin="0,0" />
-                <TextBlock Text="Enter Text:" VerticalAlignment="Center" Margin="0,5" />
-                <TextBox Text="{Binding TextToVerify, UpdateSourceTrigger=PropertyChanged}" 
-                         MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap" 
+                <Button Content="Save Message Signature to File" Command="{Binding SaveMessageSignatureCommand}" Margin="0,5" />
+
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature from Message" Margin="0,0" />
+                <TextBlock Text="Enter Message:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding TextToVerify, UpdateSourceTrigger=PropertyChanged}"
+                         MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto" />
                 <TextBlock Text="Enter Signature:" VerticalAlignment="Center" Margin="0,5" />
-                <TextBox Text="{Binding TextSignatureToVerify, UpdateSourceTrigger=PropertyChanged}" 
+                <TextBox Text="{Binding TextSignatureToVerify, UpdateSourceTrigger=PropertyChanged}"
                          MinHeight="20" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
-                <Button Content="Verify Text Signature" Command="{Binding VerifyTextSignatureCommand}" Margin="0,5" />
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Verify Message Signature" Command="{Binding VerifyTextSignatureCommand}" Margin="0,5" />
+                    <Button Grid.Column="1" Content="Load Signature from File" Command="{Binding LoadTextSignatureCommand}" Margin="0,5" />
+                </Grid>
 
                 <TextBlock FontSize="16" FontWeight="Bold" Text="Sign File" Margin="0,0" />
                 <TextBlock Text="Select File to Sign:" VerticalAlignment="Center" Margin="0,5" />
@@ -66,15 +76,26 @@
                 <Button Content="Sign File" Command="{Binding SignFileCommand}" Margin="0,5" />
                 <TextBlock Text="File Signature:" Margin="0,5" />
                 <TextBox Text="{Binding FileSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+                <Button Content="Save File Signature to File" Command="{Binding SaveFileSignatureCommand}" Margin="0,5" />
 
                 <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature from File" Margin="0,0" />
                 <TextBlock Text="Select File to Verify:" VerticalAlignment="Center" Margin="0,5" />
                 <Button Content="Browse File" Command="{Binding SelectFileToVerifyCommand}" />
                 <TextBlock Text="{Binding SelectedFileNameToVerify}" Margin="5,3" Foreground="Gray" />
                 <TextBlock Text="Enter Signature:" VerticalAlignment="Center" Margin="0,5" />
-                <TextBox Text="{Binding SignatureToVerify, UpdateSourceTrigger=PropertyChanged}" 
+                <TextBox Text="{Binding SignatureToVerify, UpdateSourceTrigger=PropertyChanged}"
                          MinHeight="20" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
-                <Button Content="Verify Signature" Command="{Binding VerifySignatureCommand}" Margin="0,5" />
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Verify Signature" Command="{Binding VerifySignatureCommand}" Margin="0,5" />
+                    <Button Grid.Column="1" Content="Load Signature from File" Command="{Binding LoadFileSignatureCommand}" Margin="0,5" />
+                </Grid>
+
             </StackPanel>
         </Grid>
     </ScrollViewer>

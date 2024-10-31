@@ -24,21 +24,6 @@ namespace InfoLabWPF.MVVM.ViewModel
         private string _textToVerify;
         private string _textSignatureToVerify;
 
-        public Lab5ViewModel()
-        {
-            GenerateKeysCommand = new RelayCommand(GenerateKeys);
-            SavePublicKeyCommand = new RelayCommand(SavePublicKey);
-            LoadPublicKeyCommand = new RelayCommand(LoadPublicKey);
-            SavePrivateKeyCommand = new RelayCommand(SavePrivateKey);
-            LoadPrivateKeyCommand = new RelayCommand(LoadPrivateKey);
-            SignMessageCommand = new RelayCommand(SignMessage);
-            SelectFileToSignCommand = new RelayCommand(SelectFileToSign);
-            SignFileCommand = new RelayCommand(SignFile);
-            SelectFileToVerifyCommand = new RelayCommand(SelectFileToVerify);
-            VerifySignatureCommand = new RelayCommand(VerifySignature);
-            VerifyTextSignatureCommand = new RelayCommand(VerifyTextSignature);
-        }
-
         public string PublicKey
         {
             get => _publicKey;
@@ -145,11 +130,34 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand SavePrivateKeyCommand { get; }
         public ICommand LoadPrivateKeyCommand { get; }
         public ICommand SignMessageCommand { get; }
+        public ICommand SaveMessageSignatureCommand { get; }
+        public ICommand LoadTextSignatureCommand { get; }
         public ICommand SelectFileToSignCommand { get; }
         public ICommand SignFileCommand { get; }
+        public ICommand SaveFileSignatureCommand { get; }
+        public ICommand LoadFileSignatureCommand { get; }
         public ICommand SelectFileToVerifyCommand { get; }
         public ICommand VerifySignatureCommand { get; }
         public ICommand VerifyTextSignatureCommand { get; }
+
+        public Lab5ViewModel()
+        {
+            GenerateKeysCommand = new RelayCommand(GenerateKeys);
+            SavePublicKeyCommand = new RelayCommand(SavePublicKey);
+            LoadPublicKeyCommand = new RelayCommand(LoadPublicKey);
+            SavePrivateKeyCommand = new RelayCommand(SavePrivateKey);
+            LoadPrivateKeyCommand = new RelayCommand(LoadPrivateKey);
+            SignMessageCommand = new RelayCommand(SignMessage);
+            SaveMessageSignatureCommand = new RelayCommand(SaveMessageSignature);
+            LoadTextSignatureCommand = new RelayCommand(LoadTextSignature);
+            SelectFileToSignCommand = new RelayCommand(SelectFileToSign);
+            SignFileCommand = new RelayCommand(SignFile);
+            SaveFileSignatureCommand = new RelayCommand(SaveFileSignature);
+            LoadFileSignatureCommand = new RelayCommand(LoadFileSignature);
+            SelectFileToVerifyCommand = new RelayCommand(SelectFileToVerify);
+            VerifySignatureCommand = new RelayCommand(VerifySignature);
+            VerifyTextSignatureCommand = new RelayCommand(VerifyTextSignature);
+        }
 
         private void GenerateKeys()
         {
@@ -229,6 +237,38 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
+        private void SaveMessageSignature()
+        {
+            if (string.IsNullOrWhiteSpace(MessageSignature))
+            {
+                MessageBox.Show("No message signature to save.");
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                File.WriteAllText(saveFileDialog.FileName, MessageSignature);
+            }
+        }
+
+        private void LoadTextSignature()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                TextSignatureToVerify = File.ReadAllText(openFileDialog.FileName);
+            }
+        }
+
         private void SelectFileToSign()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -256,6 +296,38 @@ namespace InfoLabWPF.MVVM.ViewModel
                 byte[] fileData = File.ReadAllBytes(SelectedFileNameToSign);
                 byte[] signatureBytes = rsa.SignData(fileData, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
                 FileSignature = Convert.ToBase64String(signatureBytes);
+            }
+        }
+
+        private void SaveFileSignature()
+        {
+            if (string.IsNullOrWhiteSpace(FileSignature))
+            {
+                MessageBox.Show("No file signature to save.");
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                File.WriteAllText(saveFileDialog.FileName, FileSignature);
+            }
+        }
+
+        private void LoadFileSignature()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SignatureToVerify = File.ReadAllText(openFileDialog.FileName);
             }
         }
 
