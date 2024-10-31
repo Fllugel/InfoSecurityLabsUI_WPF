@@ -21,6 +21,8 @@ namespace InfoLabWPF.MVVM.ViewModel
         private string _fileSignature;
         private string _selectedFileNameToVerify;
         private string _signatureToVerify;
+        private string _textToVerify;
+        private string _textSignatureToVerify;
 
         public Lab5ViewModel()
         {
@@ -34,6 +36,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             SignFileCommand = new RelayCommand(SignFile);
             SelectFileToVerifyCommand = new RelayCommand(SelectFileToVerify);
             VerifySignatureCommand = new RelayCommand(VerifySignature);
+            VerifyTextSignatureCommand = new RelayCommand(VerifyTextSignature);
         }
 
         public string PublicKey
@@ -116,6 +119,26 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
+        public string TextToVerify
+        {
+            get => _textToVerify;
+            set
+            {
+                _textToVerify = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string TextSignatureToVerify
+        {
+            get => _textSignatureToVerify;
+            set
+            {
+                _textSignatureToVerify = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ICommand GenerateKeysCommand { get; }
         public ICommand SavePublicKeyCommand { get; }
         public ICommand LoadPublicKeyCommand { get; }
@@ -126,13 +149,12 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand SignFileCommand { get; }
         public ICommand SelectFileToVerifyCommand { get; }
         public ICommand VerifySignatureCommand { get; }
+        public ICommand VerifyTextSignatureCommand { get; }
 
         private void GenerateKeys()
         {
-            using (var rsa = new RSACryptoServiceProvider(2048)) // Ensure key size is within the supported range
+            using (var rsa = new RSACryptoServiceProvider(2048))
             {
-                var publicKeyParams = rsa.ExportParameters(false);
-                var privateKeyParams = rsa.ExportParameters(true);
                 PublicKey = rsa.ToXmlString(false);
                 PrivateKey = rsa.ToXmlString(true);
             }
@@ -275,6 +297,35 @@ namespace InfoLabWPF.MVVM.ViewModel
                     return;
                 }
                 bool isValid = rsa.VerifyData(fileData, signatureBytes, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                MessageBox.Show(isValid ? "Signature is valid." : "Signature is invalid.");
+            }
+        }
+
+        private void VerifyTextSignature()
+        {
+            if (string.IsNullOrWhiteSpace(TextToVerify) ||
+                string.IsNullOrWhiteSpace(PublicKey) ||
+                string.IsNullOrWhiteSpace(TextSignatureToVerify))
+            {
+                MessageBox.Show("Please enter text, load the public key, and enter the signature.");
+                return;
+            }
+
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                rsa.FromXmlString(PublicKey);
+                byte[] textBytes = Encoding.UTF8.GetBytes(TextToVerify);
+                byte[] signatureBytes;
+                try
+                {
+                    signatureBytes = Convert.FromBase64String(TextSignatureToVerify);
+                }
+                catch (FormatException)
+                {
+                    MessageBox.Show("The provided signature is not a valid Base64 string.");
+                    return;
+                }
+                bool isValid = rsa.VerifyData(textBytes, signatureBytes, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
                 MessageBox.Show(isValid ? "Signature is valid." : "Signature is invalid.");
             }
         }

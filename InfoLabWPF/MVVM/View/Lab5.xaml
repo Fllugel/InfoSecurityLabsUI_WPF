@@ -48,6 +48,16 @@
                 <Button Content="Sign Message" Command="{Binding SignMessageCommand}" Margin="0,5" />
                 <TextBlock Text="Signature:" Margin="0,5" />
                 <TextBox Text="{Binding MessageSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+                
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature from Text" Margin="0,0" />
+                <TextBlock Text="Enter Text:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding TextToVerify, UpdateSourceTrigger=PropertyChanged}" 
+                         MinHeight="50" MaxHeight="150" AcceptsReturn="True" TextWrapping="Wrap" 
+                         VerticalScrollBarVisibility="Auto" />
+                <TextBlock Text="Enter Signature:" VerticalAlignment="Center" Margin="0,5" />
+                <TextBox Text="{Binding TextSignatureToVerify, UpdateSourceTrigger=PropertyChanged}" 
+                         MinHeight="20" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
+                <Button Content="Verify Text Signature" Command="{Binding VerifyTextSignatureCommand}" Margin="0,5" />
 
                 <TextBlock FontSize="16" FontWeight="Bold" Text="Sign File" Margin="0,0" />
                 <TextBlock Text="Select File to Sign:" VerticalAlignment="Center" Margin="0,5" />
@@ -57,7 +67,7 @@
                 <TextBlock Text="File Signature:" Margin="0,5" />
                 <TextBox Text="{Binding FileSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
 
-                <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature" Margin="0,0" />
+                <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature from File" Margin="0,0" />
                 <TextBlock Text="Select File to Verify:" VerticalAlignment="Center" Margin="0,5" />
                 <Button Content="Browse File" Command="{Binding SelectFileToVerifyCommand}" />
                 <TextBlock Text="{Binding SelectedFileNameToVerify}" Margin="5,3" Foreground="Gray" />
