@@ -18,14 +18,14 @@
                 <TextBlock FontSize="16" FontWeight="Bold" Text="File Encryption" Margin="0,5" />
                 <TextBlock Text="Select File to Encrypt:" VerticalAlignment="Center" Margin="0,5" />
                 <Button Content="Browse File" Command="{Binding SelectFileCommand}" />
-                <TextBlock Text="{Binding SelectedFileName}" Margin="5,3" Foreground="Gray" />
+                <TextBox Text="{Binding SelectedFileName}" Margin="5,3" Foreground="Gray" />
 
                 <Button Content="Encrypt" Command="{Binding EncryptCommand}" Margin="0,5" />
                 
                 <TextBlock FontSize="16" FontWeight="Bold" Text="File Decryption" />
                 <TextBlock Text="Select File to Decrypt:" VerticalAlignment="Center" Margin="0,5" />
                 <Button Content="Browse File" Command="{Binding SelectDecryptFileCommand}" />
-                <TextBlock Text="{Binding SelectDecryptFileName}" Margin="5,3" Foreground="Gray" />
+                <TextBox Text="{Binding SelectDecryptFileName}" Margin="5,3" Foreground="Gray" />
                 <Button Content="Decrypt" Command="{Binding DecryptCommand}" Margin="0,5" />
                 
             </StackPanel>

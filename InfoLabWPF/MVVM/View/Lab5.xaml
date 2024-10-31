@@ -71,8 +71,8 @@
 
                 <TextBlock FontSize="16" FontWeight="Bold" Text="Sign File" Margin="0,0" />
                 <TextBlock Text="Select File to Sign:" VerticalAlignment="Center" Margin="0,5" />
-                <Button Content="Browse File" Command="{Binding SelectFileToSignCommand}" />
-                <TextBlock Text="{Binding SelectedFileNameToSign}" Margin="5,3" Foreground="Gray" />
+                <Button Content="Browse File" Command="{Binding SelectFileToSignCommand}" Margin="0,5" />
+                <TextBox Text="{Binding SelectedFileNameToSign}" Foreground="Gray" />
                 <Button Content="Sign File" Command="{Binding SignFileCommand}" Margin="0,5" />
                 <TextBlock Text="File Signature:" Margin="0,5" />
                 <TextBox Text="{Binding FileSignature}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
@@ -81,7 +81,7 @@
                 <TextBlock FontSize="16" FontWeight="Bold" Text="Verify Signature from File" Margin="0,0" />
                 <TextBlock Text="Select File to Verify:" VerticalAlignment="Center" Margin="0,5" />
                 <Button Content="Browse File" Command="{Binding SelectFileToVerifyCommand}" />
-                <TextBlock Text="{Binding SelectedFileNameToVerify}" Margin="5,3" Foreground="Gray" />
+                <TextBox Text="{Binding SelectedFileNameToVerify}" Margin="0,5" Foreground="Gray" />
                 <TextBlock Text="Enter Signature:" VerticalAlignment="Center" Margin="0,5" />
                 <TextBox Text="{Binding SignatureToVerify, UpdateSourceTrigger=PropertyChanged}"
                          MinHeight="20" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" />
