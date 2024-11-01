@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -14,11 +13,11 @@ namespace InfoLabWPF.MVVM.ViewModel
     {
         private string _selectedFileName;
         private string _selectDecryptFileName;
-        private string _publicKey;
-        private string _privateKey;
+        private RSA _rsa;
 
         public Lab4ViewModel()
         {
+            _rsa = new RSA();
             GenerateKeysCommand = new RelayCommand(GenerateKeys);
             SelectFileCommand = new RelayCommand(SelectFile);
             EncryptCommand = new RelayCommand(EncryptFile);
@@ -62,20 +61,20 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         public string PublicKey
         {
-            get => _publicKey;
+            get => _rsa.PublicKey;
             set
             {
-                _publicKey = value;
+                _rsa.PublicKey = value;
                 OnPropertyChanged();
             }
         }
 
         public string PrivateKey
         {
-            get => _privateKey;
+            get => _rsa.PrivateKey;
             set
             {
-                _privateKey = value;
+                _rsa.PrivateKey = value;
                 OnPropertyChanged();
             }
         }
@@ -134,11 +133,9 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void GenerateKeys()
         {
-            using (var rsa = new RSACryptoServiceProvider(2048))
-            {
-                PublicKey = rsa.ToXmlString(false); // Export public key
-                PrivateKey = rsa.ToXmlString(true); // Export private key
-            }
+            _rsa.GenerateKeys();
+            OnPropertyChanged(nameof(PublicKey));
+            OnPropertyChanged(nameof(PrivateKey));
         }
 
         private void SelectFile()
@@ -164,49 +161,16 @@ namespace InfoLabWPF.MVVM.ViewModel
 
             try
             {
-                using (var rsa = new RSACryptoServiceProvider())
-                using (var aes = Aes.Create())
+                SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
-                    rsa.FromXmlString(PublicKey);
+                    Filter = "Encrypted Files (*.enc)|*.enc",
+                    FileName = Path.GetFileName(SelectedFileName) + ".enc"
+                };
 
-                    // Encrypt the AES key and IV with RSA
-                    byte[] encryptedAesKey = rsa.Encrypt(aes.Key, false);
-                    byte[] encryptedAesIV = rsa.Encrypt(aes.IV, false);
-
-                    // Encrypt file data with AES
-                    byte[] fileData = File.ReadAllBytes(SelectedFileName);
-                    byte[] encryptedData;
-                    using (var ms = new MemoryStream())
-                    using (var cryptoStream = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
-                    {
-                        cryptoStream.Write(fileData, 0, fileData.Length);
-                        cryptoStream.FlushFinalBlock();
-                        encryptedData = ms.ToArray();
-                    }
-
-                    // Prompt user to save the encrypted file and AES key/IV
-                    SaveFileDialog saveFileDialog = new SaveFileDialog
-                    {
-                        Filter = "Encrypted Files (*.enc)|*.enc",
-                        FileName = Path.GetFileName(SelectedFileName) + ".enc"
-                    };
-
-                    if (saveFileDialog.ShowDialog() == true)
-                    {
-                        using (var fs = new FileStream(saveFileDialog.FileName, FileMode.Create))
-                        using (var bw = new BinaryWriter(fs))
-                        {
-                            // Write encrypted AES key, IV, and encrypted data
-                            bw.Write(encryptedAesKey.Length);
-                            bw.Write(encryptedAesKey);
-                            bw.Write(encryptedAesIV.Length);
-                            bw.Write(encryptedAesIV);
-                            bw.Write(encryptedData.Length);
-                            bw.Write(encryptedData);
-                        }
-
-                        MessageBox.Show($"File encrypted successfully to: {saveFileDialog.FileName}");
-                    }
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    _rsa.EncryptFile(SelectedFileName, saveFileDialog.FileName);
+                    MessageBox.Show($"File encrypted successfully to: {saveFileDialog.FileName}");
                 }
             }
             catch (Exception ex)
@@ -238,51 +202,15 @@ namespace InfoLabWPF.MVVM.ViewModel
 
             try
             {
-                using (var rsa = new RSACryptoServiceProvider())
-                using (var aes = Aes.Create())
+                SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
-                    rsa.FromXmlString(PrivateKey);
+                    FileName = Path.GetFileNameWithoutExtension(SelectDecryptFileName)
+                };
 
-                    byte[] encryptedData;
-                    using (var fs = new FileStream(SelectDecryptFileName, FileMode.Open))
-                    using (var br = new BinaryReader(fs))
-                    {
-                        // Read encrypted AES key and IV
-                        int aesKeyLength = br.ReadInt32();
-                        byte[] encryptedAesKey = br.ReadBytes(aesKeyLength);
-                        int aesIVLength = br.ReadInt32();
-                        byte[] encryptedAesIV = br.ReadBytes(aesIVLength);
-
-                        // Decrypt AES key and IV
-                        aes.Key = rsa.Decrypt(encryptedAesKey, false);
-                        aes.IV = rsa.Decrypt(encryptedAesIV, false);
-
-                        // Read encrypted file data
-                        int encryptedDataLength = br.ReadInt32();
-                        encryptedData = br.ReadBytes(encryptedDataLength);
-                    }
-
-                    // Decrypt the file data with AES
-                    byte[] decryptedData;
-                    using (var ms = new MemoryStream())
-                    using (var cryptoStream = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
-                    {
-                        cryptoStream.Write(encryptedData, 0, encryptedData.Length);
-                        cryptoStream.FlushFinalBlock();
-                        decryptedData = ms.ToArray();
-                    }
-
-                    // Prompt user to save the decrypted file
-                    SaveFileDialog saveFileDialog = new SaveFileDialog
-                    { 
-                        FileName = Path.GetFileNameWithoutExtension(SelectDecryptFileName)
-                    };
-
-                    if (saveFileDialog.ShowDialog() == true)
-                    {
-                        File.WriteAllBytes(saveFileDialog.FileName, decryptedData);
-                        MessageBox.Show($"File decrypted successfully to: {saveFileDialog.FileName}");
-                    }
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    _rsa.DecryptFile(SelectDecryptFileName, saveFileDialog.FileName);
+                    MessageBox.Show($"File decrypted successfully to: {saveFileDialog.FileName}");
                 }
             }
             catch (Exception ex)
@@ -290,7 +218,6 @@ namespace InfoLabWPF.MVVM.ViewModel
                 MessageBox.Show($"Error during decryption: {ex.Message}");
             }
         }
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 
