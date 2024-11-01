@@ -200,7 +200,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private void ShowError(string message)
+        private static void ShowError(string message)
         {
             MessageBox.Show(message, "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }

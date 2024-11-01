@@ -12,7 +12,7 @@ namespace InfoLabWPF.MVVM.ViewModel
     public class Lab1ViewModel : INotifyPropertyChanged
     {
         private LinearCongruentialGenerator _lcg;
-        private GCDTest _gcdTest;
+        private readonly GCDTest _gcdTest;
         private List<uint> _sequence;
         private uint _modulus;
         private uint _multiplier;
@@ -53,7 +53,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 }
                 else
                 {
-                    ShowError("Modulus must be a positive integer and less than the maximum value of uint.");
+                    ShowError("Modulus must be a positive integer less than the maximum value of uint.");
                 }
             }
         }
@@ -70,7 +70,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 }
                 else
                 {
-                    ShowError("Multiplier must be a positive integer and less than the maximum value of uint.");
+                    ShowError("Multiplier must be a positive integer less than the maximum value of uint.");
                 }
             }
         }
@@ -87,7 +87,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 }
                 else
                 {
-                    ShowError("Increment must be a positive integer and less than the maximum value of uint.");
+                    ShowError("Increment must be a positive integer less than the maximum value of uint.");
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 }
                 else
                 {
-                    ShowError("Seed must be a positive integer and less than the maximum value of uint.");
+                    ShowError("Seed must be a positive integer less than the maximum value of uint.");
                 }
             }
         }
@@ -121,7 +121,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 }
                 else
                 {
-                    ShowError("Sequence count must be a positive integer and less than the maximum value of uint.");
+                    ShowError("Sequence count must be a positive integer less than the maximum value of uint.");
                 }
             }
         }
@@ -168,26 +168,28 @@ namespace InfoLabWPF.MVVM.ViewModel
                 }
                 else
                 {
-                    ShowError("Period must be a positive integer and less than the maximum value of uint.");
+                    ShowError("Period must be a positive integer less than the maximum value of uint.");
                 }
             }
         }
 
-        public double PiDeviation => PiEstimate == 0 ? 0 : Math.Abs(Math.PI - PiEstimate);
-        public double PiBuiltInDeviation => PiBuiltInEstimate == 0 ? 0 : Math.Abs(Math.PI - PiBuiltInEstimate);
+        public double PiDeviation => PiEstimate <= 0 ? 0 : Math.Abs(Math.PI - PiEstimate);
+        public double PiBuiltInDeviation => PiBuiltInEstimate <= 0 ? 0 : Math.Abs(Math.PI - PiBuiltInEstimate);
 
         private void GenerateSequence()
         {
-            _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
+            if (_lcg == null)
+            {
+                _lcg = new LinearCongruentialGenerator(_modulus, _multiplier, _increment, _seed);
+            }
             Sequence = new List<uint>(_lcg.GenerateSequence(_sequenceCount));
 
-            MessageBox.Show("Sequence generation was successful.", "Success", MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            MessageBox.Show("Sequence generation was successful.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void EstimatePi()
         {
-            if (_gcdTest != null)
+            if (_gcdTest != null && _sequence != null)
             {
                 PiEstimate = _gcdTest.EstimatePi(_sequence);
                 OnPropertyChanged(nameof(PiDeviation));
@@ -232,7 +234,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             SequenceCount = configLoader.Lab1SequenceCount.ToString(); 
         }
 
-        private void ShowError(string message)
+        private static void ShowError(string message)
         {
             MessageBox.Show(message, "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }

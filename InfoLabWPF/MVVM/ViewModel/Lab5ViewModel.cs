@@ -170,10 +170,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void SavePublicKey()
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            SaveFileDialog saveFileDialog = new SaveFileDialog { };
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -183,10 +180,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void SavePrivateKey()
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            SaveFileDialog saveFileDialog = new SaveFileDialog { };
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -196,10 +190,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadPublicKey()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            OpenFileDialog openFileDialog = new OpenFileDialog { };
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -209,10 +200,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadPrivateKey()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            OpenFileDialog openFileDialog = new OpenFileDialog { };
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -228,7 +216,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 return;
             }
 
-            using (var rsa = new RSACryptoServiceProvider())
+            using (var rsa = new RSACryptoServiceProvider(2048))
             {
                 rsa.FromXmlString(PrivateKey);
                 byte[] messageBytes = Encoding.UTF8.GetBytes(MessageToSign);
@@ -245,10 +233,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 return;
             }
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            SaveFileDialog saveFileDialog = new SaveFileDialog { };
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -258,10 +243,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadTextSignature()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            OpenFileDialog openFileDialog = new OpenFileDialog { };
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -290,7 +272,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 return;
             }
 
-            using (var rsa = new RSACryptoServiceProvider())
+            using (var rsa = new RSACryptoServiceProvider(2048))
             {
                 rsa.FromXmlString(PrivateKey);
                 byte[] fileData = File.ReadAllBytes(SelectedFileNameToSign);
@@ -307,10 +289,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 return;
             }
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            SaveFileDialog saveFileDialog = new SaveFileDialog { };
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -320,10 +299,7 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void LoadFileSignature()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "Text Files (*.txt)|*.txt"
-            };
+            OpenFileDialog openFileDialog = new OpenFileDialog { };
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -354,7 +330,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 return;
             }
 
-            using (var rsa = new RSACryptoServiceProvider())
+            using (var rsa = new RSACryptoServiceProvider(2048))
             {
                 rsa.FromXmlString(PublicKey);
                 byte[] fileData = File.ReadAllBytes(SelectedFileNameToVerify);
@@ -383,7 +359,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 return;
             }
 
-            using (var rsa = new RSACryptoServiceProvider())
+            using (var rsa = new RSACryptoServiceProvider(2048))
             {
                 rsa.FromXmlString(PublicKey);
                 byte[] textBytes = Encoding.UTF8.GetBytes(TextToVerify);

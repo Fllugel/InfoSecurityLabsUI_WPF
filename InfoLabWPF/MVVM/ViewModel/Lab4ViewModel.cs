@@ -15,7 +15,7 @@ namespace InfoLabWPF.MVVM.ViewModel
     {
         private string _selectedFileName;
         private string _selectDecryptFileName;
-        private RSA _rsa;
+        private readonly RSA _rsa;
 
         public Lab4ViewModel()
         {
@@ -85,7 +85,7 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                Filter = "Text Files (*.txt)|*.txt"
+                Filter = $"Text Files (*.txt)|*.txt"
             };
 
             if (saveFileDialog.ShowDialog() == true)

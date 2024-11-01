@@ -15,15 +15,14 @@ namespace InfoLabWPF.MVVM.ViewModel
 {
     public class Lab3ViewModel : INotifyPropertyChanged
     {
-        private BitArray _passwordPhrase;
         private string _selectedFileName;
         private string _selectDecryptFileName;
-        private byte[] _encryptedFileData;
-        private byte[] _decryptedFileData;
 
         private RC5? _rc5;
         private readonly MD5? _md5;
         private readonly ConfigLoader _configLoader;
+
+        private const string ErrorMessage = "Error";
 
         public Lab3ViewModel()
         {
@@ -43,8 +42,10 @@ namespace InfoLabWPF.MVVM.ViewModel
         public ICommand SelectFileCommand { get; }
         public ICommand SelectDecryptFileCommand { get; }
 
+        private BitArray _passwordPhrase;
         public string PasswordPhrase
         {
+            get => BitArrayToString(_passwordPhrase);
             set
             {
                 _passwordPhrase = GetEncryptionKeyFromPassword(value, _configLoader.Lab3PasswordPhraseLength);
@@ -78,28 +79,28 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             if (_rc5 == null)
             {
-                MessageBox.Show("Encryption key is not set.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Encryption key is not set.", ErrorMessage, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (string.IsNullOrEmpty(_selectedFileName))
             {
-                MessageBox.Show("No file selected for encryption.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("No file selected for encryption.", ErrorMessage, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            byte[] fileData = File.ReadAllBytes(_selectedFileName);
+            byte[] fileData = await File.ReadAllBytesAsync(_selectedFileName);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            _encryptedFileData = await Task.Run(() => _rc5.Encrypt(fileData));
+            byte[] encryptedFileData = await Task.Run(() => _rc5.Encrypt(fileData));
             stopwatch.Stop();
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             if (saveFileDialog.ShowDialog() == true)
             {
                 string outputFile = saveFileDialog.FileName;
-                File.WriteAllBytes(outputFile, _encryptedFileData);
+                await File.WriteAllBytesAsync(outputFile, encryptedFileData);
                 MessageBox.Show($"File encrypted successfully in {stopwatch.ElapsedMilliseconds} ms.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
@@ -108,28 +109,28 @@ namespace InfoLabWPF.MVVM.ViewModel
         {
             if (_rc5 == null)
             {
-                MessageBox.Show("Decryption key is not set.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Decryption key is not set.", ErrorMessage, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (string.IsNullOrEmpty(_selectDecryptFileName))
             {
-                MessageBox.Show("No file selected for decryption.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("No file selected for decryption.", ErrorMessage, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            byte[] fileData = File.ReadAllBytes(_selectDecryptFileName);
+            byte[] fileData = await File.ReadAllBytesAsync(_selectDecryptFileName);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            _decryptedFileData = await Task.Run(() => _rc5.Decrypt(fileData));
+            byte[] decryptedFileData = await Task.Run(() => _rc5.Decrypt(fileData));
             stopwatch.Stop();
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             if (saveFileDialog.ShowDialog() == true)
             {
                 string outputFile = saveFileDialog.FileName;
-                File.WriteAllBytes(outputFile, _decryptedFileData);
+                await File.WriteAllBytesAsync(outputFile, decryptedFileData);
                 MessageBox.Show($"File decrypted successfully in {stopwatch.ElapsedMilliseconds} ms.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
@@ -173,7 +174,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             return encryptionKey;
         }
 
-        private byte[] BitArrayToByteArray(BitArray bitArray)
+        private static byte[] BitArrayToByteArray(BitArray bitArray)
         {
             int numBytes = (bitArray.Length + 7) / 8;
             byte[] bytes = new byte[numBytes];
@@ -181,7 +182,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             return bytes;
         }
 
-        private string BitArrayToString(BitArray bitArray)
+        private static string BitArrayToString(BitArray bitArray)
         {
             StringBuilder sb = new StringBuilder();
             foreach (bool bit in bitArray)
