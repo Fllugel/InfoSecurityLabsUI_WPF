@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using InfoLabWPF.MVVM.Model;
 
 namespace InfoLabWPF.MVVM.ViewModel
 {

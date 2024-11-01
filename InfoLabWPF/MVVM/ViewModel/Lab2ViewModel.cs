@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using InfoLabWPF.MVVM.Model;
 
 namespace InfoLabWPF.MVVM.ViewModel
 {
