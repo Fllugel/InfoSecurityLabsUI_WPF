@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace InfoLabWPF.MVVM.ViewModel
 {
@@ -138,20 +140,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             OnPropertyChanged(nameof(PrivateKey));
         }
 
-        private void SelectFile()
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "All Files (*.*)|*.*"
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                SelectedFileName = openFileDialog.FileName;
-            }
-        }
-
-        private void EncryptFile()
+        private async void EncryptFile()
         {
             if (string.IsNullOrWhiteSpace(SelectedFileName) || string.IsNullOrWhiteSpace(PublicKey))
             {
@@ -169,8 +158,11 @@ namespace InfoLabWPF.MVVM.ViewModel
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    _rsa.EncryptFile(SelectedFileName, saveFileDialog.FileName);
-                    MessageBox.Show($"File encrypted successfully to: {saveFileDialog.FileName}");
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    await Task.Run(() => _rsa.EncryptFile(SelectedFileName, saveFileDialog.FileName));
+                    stopwatch.Stop();
+                    MessageBox.Show($"File encrypted successfully to: {saveFileDialog.FileName} in {stopwatch.ElapsedMilliseconds} ms.","Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -179,20 +171,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             }
         }
 
-        private void SelectDecryptFile()
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "Encrypted Files (*.enc)|*.enc"
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                SelectDecryptFileName = openFileDialog.FileName;
-            }
-        }
-
-        private void DecryptFile()
+        private async void DecryptFile()
         {
             if (string.IsNullOrWhiteSpace(SelectDecryptFileName) || string.IsNullOrWhiteSpace(PrivateKey))
             {
@@ -209,13 +188,42 @@ namespace InfoLabWPF.MVVM.ViewModel
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    _rsa.DecryptFile(SelectDecryptFileName, saveFileDialog.FileName);
-                    MessageBox.Show($"File decrypted successfully to: {saveFileDialog.FileName}");
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    await Task.Run(() => _rsa.DecryptFile(SelectDecryptFileName, saveFileDialog.FileName));
+                    stopwatch.Stop();
+                    MessageBox.Show($"File decrypted successfully to: {saveFileDialog.FileName} in {stopwatch.ElapsedMilliseconds} ms.","Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error during decryption: {ex.Message}");
+            }
+        }
+
+        private void SelectFile()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "All Files (*.*)|*.*"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SelectedFileName = openFileDialog.FileName;
+            }
+        }
+
+        private void SelectDecryptFile()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Encrypted Files (*.enc)|*.enc"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SelectDecryptFileName = openFileDialog.FileName;
             }
         }
 

@@ -155,7 +155,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             {
                 try
                 {
-                    byte[] computedHash = await _md5.ComputeHashFromFileAsync(openFileDialog.FileName);
+                    byte[] computedHash = await _md5.ComputeHashFromFile(openFileDialog.FileName);
                     string expectedHash = TestHash;
                     string computedHashString = BitConverter.ToString(computedHash).Replace("-", "").ToUpper();
                     string expectedHashString = expectedHash.Replace("-", "").ToUpper();
@@ -189,7 +189,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 {
                     Message = "";
                     
-                    byte[] hashBytes = await Task.Run(() => _md5.ComputeHashFromFileAsync(openFileDialog.FileName));
+                    byte[] hashBytes = await Task.Run(() => _md5.ComputeHashFromFile(openFileDialog.FileName));
                     EncryptedMessage = BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
                     MessageBox.Show("Message encryption from file was successful.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -205,7 +205,7 @@ namespace InfoLabWPF.MVVM.ViewModel
             MessageBox.Show(message, "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

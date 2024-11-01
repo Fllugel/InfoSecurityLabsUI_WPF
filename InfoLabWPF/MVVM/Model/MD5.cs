@@ -33,7 +33,7 @@ public class MD5
         return GetResult();
     }
 
-    public async Task<byte[]> ComputeHashFromFileAsync(string filePath)
+    public async Task<byte[]> ComputeHashFromFile(string filePath)
     {
         if (!File.Exists(filePath))
         {
