@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32; 
+using Microsoft.Win32;
 
 namespace InfoLabWPF.MVVM.ViewModel
 {
@@ -161,25 +161,50 @@ namespace InfoLabWPF.MVVM.ViewModel
                 MessageBox.Show("Please select a file and load the public key.");
                 return;
             }
-        
+
             try
             {
                 using (var rsa = new RSACryptoServiceProvider())
+                using (var aes = Aes.Create())
                 {
                     rsa.FromXmlString(PublicKey);
+
+                    // Encrypt the AES key and IV with RSA
+                    byte[] encryptedAesKey = rsa.Encrypt(aes.Key, false);
+                    byte[] encryptedAesIV = rsa.Encrypt(aes.IV, false);
+
+                    // Encrypt file data with AES
                     byte[] fileData = File.ReadAllBytes(SelectedFileName);
-                    byte[] encryptedData = rsa.Encrypt(fileData, false);
-        
-                    // Prompt user to save the encrypted file
+                    byte[] encryptedData;
+                    using (var ms = new MemoryStream())
+                    using (var cryptoStream = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cryptoStream.Write(fileData, 0, fileData.Length);
+                        cryptoStream.FlushFinalBlock();
+                        encryptedData = ms.ToArray();
+                    }
+
+                    // Prompt user to save the encrypted file and AES key/IV
                     SaveFileDialog saveFileDialog = new SaveFileDialog
                     {
                         Filter = "Encrypted Files (*.enc)|*.enc",
-                        FileName = Path.GetFileName(SelectedFileName) + ".enc" // Default name
+                        FileName = Path.GetFileName(SelectedFileName) + ".enc"
                     };
-        
+
                     if (saveFileDialog.ShowDialog() == true)
                     {
-                        File.WriteAllBytes(saveFileDialog.FileName, encryptedData);
+                        using (var fs = new FileStream(saveFileDialog.FileName, FileMode.Create))
+                        using (var bw = new BinaryWriter(fs))
+                        {
+                            // Write encrypted AES key, IV, and encrypted data
+                            bw.Write(encryptedAesKey.Length);
+                            bw.Write(encryptedAesKey);
+                            bw.Write(encryptedAesIV.Length);
+                            bw.Write(encryptedAesIV);
+                            bw.Write(encryptedData.Length);
+                            bw.Write(encryptedData);
+                        }
+
                         MessageBox.Show($"File encrypted successfully to: {saveFileDialog.FileName}");
                     }
                 }
@@ -189,7 +214,6 @@ namespace InfoLabWPF.MVVM.ViewModel
                 MessageBox.Show($"Error during encryption: {ex.Message}");
             }
         }
-
 
         private void SelectDecryptFile()
         {
@@ -211,22 +235,49 @@ namespace InfoLabWPF.MVVM.ViewModel
                 MessageBox.Show("Please select an encrypted file and load the private key.");
                 return;
             }
-        
+
             try
             {
                 using (var rsa = new RSACryptoServiceProvider())
+                using (var aes = Aes.Create())
                 {
                     rsa.FromXmlString(PrivateKey);
-                    byte[] encryptedData = File.ReadAllBytes(SelectDecryptFileName);
-                    byte[] decryptedData = rsa.Decrypt(encryptedData, false);
-        
+
+                    byte[] encryptedData;
+                    using (var fs = new FileStream(SelectDecryptFileName, FileMode.Open))
+                    using (var br = new BinaryReader(fs))
+                    {
+                        // Read encrypted AES key and IV
+                        int aesKeyLength = br.ReadInt32();
+                        byte[] encryptedAesKey = br.ReadBytes(aesKeyLength);
+                        int aesIVLength = br.ReadInt32();
+                        byte[] encryptedAesIV = br.ReadBytes(aesIVLength);
+
+                        // Decrypt AES key and IV
+                        aes.Key = rsa.Decrypt(encryptedAesKey, false);
+                        aes.IV = rsa.Decrypt(encryptedAesIV, false);
+
+                        // Read encrypted file data
+                        int encryptedDataLength = br.ReadInt32();
+                        encryptedData = br.ReadBytes(encryptedDataLength);
+                    }
+
+                    // Decrypt the file data with AES
+                    byte[] decryptedData;
+                    using (var ms = new MemoryStream())
+                    using (var cryptoStream = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cryptoStream.Write(encryptedData, 0, encryptedData.Length);
+                        cryptoStream.FlushFinalBlock();
+                        decryptedData = ms.ToArray();
+                    }
+
                     // Prompt user to save the decrypted file
                     SaveFileDialog saveFileDialog = new SaveFileDialog
-                    {
-                        Filter = "Decrypted Files (*.dec)|*.dec",
-                        FileName = Path.GetFileNameWithoutExtension(SelectDecryptFileName) + ".dec" // Default name
+                    { 
+                        FileName = Path.GetFileNameWithoutExtension(SelectDecryptFileName)
                     };
-        
+
                     if (saveFileDialog.ShowDialog() == true)
                     {
                         File.WriteAllBytes(saveFileDialog.FileName, decryptedData);
@@ -239,6 +290,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                 MessageBox.Show($"Error during decryption: {ex.Message}");
             }
         }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
