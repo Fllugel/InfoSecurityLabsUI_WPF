@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using InfoLabWPF.MVVM.Model;
+using Microsoft.Win32;
 
 namespace InfoLabWPF.MVVM.ViewModel
 {
@@ -219,7 +221,39 @@ namespace InfoLabWPF.MVVM.ViewModel
 
         private void SaveSequence()
         {
-            _lcg?.SaveSequence(_sequence);
+            if (_sequence == null)
+            {
+                MessageBox.Show("No sequence to save.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
+                Title = "Save Sequence"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                var path = saveFileDialog.FileName;
+
+                try
+                {
+                    using (var writer = new StreamWriter(path))
+                    {
+                        foreach (var number in _sequence)
+                        {
+                            writer.WriteLine(number);
+                        }
+                    }
+
+                    MessageBox.Show("Sequence saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void LoadVariantData()

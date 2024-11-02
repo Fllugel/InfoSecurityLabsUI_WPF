@@ -30,7 +30,7 @@ namespace InfoLabWPF.MVVM.Model
                 using (var aes = new AesGcm(aesKey))
                 {
                     // Encrypt the AES key with RSA
-                    byte[] encryptedAesKey = rsa.Encrypt(aesKey, RSAEncryptionPadding.OaepSHA256);
+                    byte[] encryptedAesKey = rsa.Encrypt(aesKey, RSAEncryptionPadding.OaepSHA1);
 
                     // Encrypt file data with AES
                     byte[] fileData = File.ReadAllBytes(inputFilePath);
@@ -79,7 +79,7 @@ namespace InfoLabWPF.MVVM.Model
                     encryptedData = br.ReadBytes(encryptedDataLength);
 
                     // Decrypt AES key
-                    byte[] aesKey = rsa.Decrypt(encryptedAesKey, RSAEncryptionPadding.OaepSHA256);
+                    byte[] aesKey = rsa.Decrypt(encryptedAesKey, RSAEncryptionPadding.OaepSHA1);
 
                     using (var aes = new AesGcm(aesKey))
                     {

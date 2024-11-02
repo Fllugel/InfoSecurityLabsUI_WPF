@@ -1,65 +1,90 @@
-﻿namespace InfoLabWPF.Tests;
-using InfoLabWPF.MVVM.Model;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
+using System.Security.Cryptography;
+using RSA = InfoLabWPF.MVVM.Model.RSA;
 
-[TestClass]
-public class RSATest
+namespace InfoLabWPF.Tests
 {
-    [TestMethod]
-    public void GenerateKeys_CreatesNonEmptyKeys()
+    [TestClass]
+    public class RSATests
     {
-        var rsa = new RSA();
-        rsa.GenerateKeys();
-        Assert.IsFalse(string.IsNullOrEmpty(rsa.PublicKey));
-        Assert.IsFalse(string.IsNullOrEmpty(rsa.PrivateKey));
-    }
+        private RSA rsa;
 
-    [TestMethod]
-    public void EncryptFile_EncryptsAndCreatesOutputFile()
-    {
-        var rsa = new RSA();
-        rsa.GenerateKeys();
-        var inputFilePath = "input.txt";
-        var outputFilePath = "output.enc";
-        File.WriteAllText(inputFilePath, "Test data");
-        rsa.EncryptFile(inputFilePath, outputFilePath);
-        Assert.IsTrue(File.Exists(outputFilePath));
-        File.Delete(inputFilePath);
-        File.Delete(outputFilePath);
-    }
+        [TestInitialize]
+        public void Setup()
+        {
+            rsa = new RSA();
+            rsa.GenerateKeys();
+        }
 
-    [TestMethod]
-    public void DecryptFile_DecryptsCorrectly()
-    {
-        var rsa = new RSA();
-        rsa.GenerateKeys();
-        var inputFilePath = "input.txt";
-        var encryptedFilePath = "encrypted.enc";
-        var decryptedFilePath = "decrypted.txt";
-        File.WriteAllText(inputFilePath, "Test data");
-        rsa.EncryptFile(inputFilePath, encryptedFilePath);
-        rsa.DecryptFile(encryptedFilePath, decryptedFilePath);
-        var decryptedData = File.ReadAllText(decryptedFilePath);
-        Assert.AreEqual("Test data", decryptedData);
-        File.Delete(inputFilePath);
-        File.Delete(encryptedFilePath);
-        File.Delete(decryptedFilePath);
-    }
+        [TestMethod]
+        public void GenerateKeys_CreatesValidKeys()
+        {
+            Assert.IsFalse(string.IsNullOrEmpty(rsa.PublicKey));
+            Assert.IsFalse(string.IsNullOrEmpty(rsa.PrivateKey));
+        }
 
-    [TestMethod]
-    [ExpectedException(typeof(FileNotFoundException))]
-    public void EncryptFile_ThrowsExceptionForNonExistentInputFile()
-    {
-        var rsa = new RSA();
-        rsa.GenerateKeys();
-        rsa.EncryptFile("nonexistent.txt", "output.enc");
-    }
+        [TestMethod]
+        public void EncryptFile_DecryptFile_RestoresOriginalContent()
+        {
+            string originalContent = "This is a test.";
+            string inputFilePath = "testInput.txt";
+            string encryptedFilePath = "testEncrypted.bin";
+            string decryptedFilePath = "testDecrypted.txt";
 
-    [TestMethod]
-    [ExpectedException(typeof(FileNotFoundException))]
-    public void DecryptFile_ThrowsExceptionForNonExistentInputFile()
-    {
-        var rsa = new RSA();
-        rsa.GenerateKeys();
-        rsa.DecryptFile("nonexistent.enc", "output.txt");
+            File.WriteAllText(inputFilePath, originalContent);
+
+            rsa.EncryptFile(inputFilePath, encryptedFilePath);
+            rsa.DecryptFile(encryptedFilePath, decryptedFilePath);
+
+            string decryptedContent = File.ReadAllText(decryptedFilePath);
+
+            Assert.AreEqual(originalContent, decryptedContent);
+
+            File.Delete(inputFilePath);
+            File.Delete(encryptedFilePath);
+            File.Delete(decryptedFilePath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(CryptographicException))]
+        public void DecryptFile_WithInvalidPrivateKey_ThrowsException()
+        {
+            string originalContent = "This is a test.";
+            string inputFilePath = "testInput.txt";
+            string encryptedFilePath = "testEncrypted.bin";
+            string decryptedFilePath = "testDecrypted.txt";
+
+            File.WriteAllText(inputFilePath, originalContent);
+
+            rsa.EncryptFile(inputFilePath, encryptedFilePath);
+
+            // Ensure the encrypted file exists before attempting to decrypt
+            Assert.IsTrue(File.Exists(encryptedFilePath));
+
+            RSA rsaInvalid = new RSA();
+            rsaInvalid.GenerateKeys(); // Generate a different key pair
+            rsaInvalid.DecryptFile(encryptedFilePath, decryptedFilePath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void EncryptFile_WithNonExistentInputFile_ThrowsException()
+        {
+            string inputFilePath = "nonExistentInput.txt";
+            string encryptedFilePath = "testEncrypted.bin";
+
+            rsa.EncryptFile(inputFilePath, encryptedFilePath);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void DecryptFile_WithNonExistentInputFile_ThrowsException()
+        {
+            string inputFilePath = "nonExistentInput.bin";
+            string decryptedFilePath = "testDecrypted.txt";
+
+            rsa.DecryptFile(inputFilePath, decryptedFilePath);
+        }
     }
 }

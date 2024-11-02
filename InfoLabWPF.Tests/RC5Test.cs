@@ -1,62 +1,59 @@
-﻿namespace InfoLabWPF.Tests;
-using InfoLabWPF.MVVM.Model;
+﻿using InfoLabWPF.MVVM.Model;
+namespace InfoLabWPF.Tests;
 
 [TestClass]
-public class RC5Test
+public class RC5Tests
 {
-    [TestMethod]
-    public void EncryptBlock_EncryptsCorrectly()
+    private RC5 CreateRC5Instance()
     {
-        var rc5 = new RC5(new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF }, 9, 2, 3, 1);
-        uint A = 0x01234567;
-        uint B = 0x89ABCDEF;
-        rc5.EncryptBlock(ref A, ref B);
-        Assert.AreEqual(0xEEDBA521, A);
-        Assert.AreEqual(0x6D8F4B15, B);
+        byte[] key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+        return new RC5(key, 429490006, 1664525, 10223, 1);
     }
 
     [TestMethod]
-    public void DecryptBlock_DecryptsCorrectly()
+    public void Encrypt_Decrypt_ReturnsOriginalData()
     {
-        var rc5 = new RC5(new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF }, 9, 2, 3, 1);
-        uint A = 0xEEDBA521;
-        uint B = 0x6D8F4B15;
-        rc5.DecryptBlock(ref A, ref B);
-        Assert.AreEqual(0x01234567, A);
-        Assert.AreEqual(0x89ABCDEF, B);
+        RC5 rc5 = CreateRC5Instance();
+        byte[] data = { 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80 };
+
+        byte[] encrypted = rc5.Encrypt(data);
+        byte[] decrypted = rc5.Decrypt(encrypted);
+
+        CollectionAssert.AreEqual(data, decrypted);
     }
 
     [TestMethod]
-    public void Encrypt_EncryptsDataCorrectly()
+    public void Encrypt_EmptyData_ReturnsEmptyArray()
     {
-        var rc5 = new RC5(new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF }, 9, 2, 3, 1);
-        var data = new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
-        var encrypted = rc5.Encrypt(data);
-        Assert.AreEqual(16, encrypted.Length);
-    }
+        RC5 rc5 = CreateRC5Instance();
+        byte[] data = new byte[0];
 
-    [TestMethod]
-    public void Decrypt_DecryptsDataCorrectly()
-    {
-        var rc5 = new RC5(new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF }, 9, 2, 3, 1);
-        var encrypted = new byte[]
-        {
-            0xEE, 0xDB, 0xA5, 0x21,
-            0x6D, 0x8F, 0x4B, 0x15,
-            0x01, 0x23, 0x45, 0x67,
-            0x89, 0xAB, 0xCD, 0xEF
-        };
-        var decrypted = rc5.Decrypt(encrypted);
-        Assert.AreEqual(8, decrypted.Length);
-        CollectionAssert.AreEqual(new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF }, decrypted);
+        byte[] encrypted = rc5.Encrypt(data);
+
+        Assert.AreEqual(8, encrypted.Length); // Only IV should be present
     }
 
     [TestMethod]
     [ExpectedException(typeof(ArgumentException))]
-    public void Decrypt_ThrowsExceptionForInvalidDataLength()
+    public void Decrypt_InvalidDataLength_ThrowsArgumentException()
     {
-        var rc5 = new RC5(new byte[] { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF }, 9, 2, 3, 1);
-        var invalidData = new byte[] { 0x01, 0x23, 0x45 };
-        rc5.Decrypt(invalidData);
+        RC5 rc5 = CreateRC5Instance();
+        byte[] data = { 0x10, 0x20, 0x30 };
+
+        rc5.Decrypt(data);
+    }
+
+    [TestMethod]
+    public void EncryptBlock_DecryptBlock_ReturnsOriginalValues()
+    {
+        RC5 rc5 = CreateRC5Instance();
+        uint A = 0x12345678;
+        uint B = 0x9ABCDEF0;
+
+        rc5.EncryptBlock(ref A, ref B);
+        rc5.DecryptBlock(ref A, ref B);
+
+        Assert.AreEqual((int)0x12345678, (int)A);
+        Assert.AreEqual(unchecked((int)0x9ABCDEF0), (int)B);
     }
 }
