@@ -163,7 +163,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                     stopwatch.Start();
                     await Task.Run(() => _rsa.EncryptFile(SelectedFileName, saveFileDialog.FileName));
                     stopwatch.Stop();
-                    MessageBox.Show($"File encrypted successfully to: {saveFileDialog.FileName} in {stopwatch.ElapsedMilliseconds} ms.","Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"File encrypted successfully in {stopwatch.ElapsedMilliseconds} ms.","Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -193,7 +193,7 @@ namespace InfoLabWPF.MVVM.ViewModel
                     stopwatch.Start();
                     await Task.Run(() => _rsa.DecryptFile(SelectDecryptFileName, saveFileDialog.FileName));
                     stopwatch.Stop();
-                    MessageBox.Show($"File decrypted successfully to: {saveFileDialog.FileName} in {stopwatch.ElapsedMilliseconds} ms.","Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"File decrypted successfully in {stopwatch.ElapsedMilliseconds} ms.","Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
